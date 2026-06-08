@@ -1,0 +1,7 @@
+# Documentación interna de desarrollo (no subir a GitHub)
+CONTEXTO_PROYECTO.md
+
+# El monorepo no tiene dependencias en la raíz — solo en front/ y backend/
+/node_modules/
+/package.json
+/package-lock.json

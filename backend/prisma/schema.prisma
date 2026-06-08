@@ -1,0 +1,220 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoRubro {
+  estetica
+  barberia
+  salud_medicina
+  psicologia
+  nutricion
+  medicina
+}
+
+enum RolUsuario {
+  admin
+  profesional
+}
+
+enum EstadoTurno {
+  pendiente
+  completo
+  cancelado
+  inasistencia
+}
+
+enum EstadoSuscripcion {
+  pendiente
+  activa
+  suspendida
+  cancelada
+}
+
+enum ModalidadServicio {
+  presencial
+  online
+}
+
+enum CanalNotificacion {
+  whatsapp
+  email
+}
+
+enum EstadoNotificacion {
+  pendiente
+  enviado
+  fallido
+}
+
+enum TipoMovimiento {
+  ingreso
+  egreso
+}
+
+enum MetodoPago {
+  efectivo
+  transferencia
+}
+
+model Comercio {
+  id                 String            @id @default(uuid()) @db.Uuid
+  nombre             String
+  url                String            @unique
+  estado_suscripcion EstadoSuscripcion
+  direccion          String?
+  barrio             String
+  rubro              TipoRubro
+  fecha_vencimiento  DateTime
+  created_at         DateTime          @default(now())
+  mp_preapproval_id  String?
+  logo_url           String?
+
+  usuarios       Usuario[]
+  servicios      Servicio[]
+  turnos         Turno[]
+  fichas         Ficha[]
+  movimientos    Movimiento[]
+  notificaciones Notificacion[]
+
+  @@map("comercios")
+}
+
+model Usuario {
+  id                    String     @id @default(uuid()) @db.Uuid
+  comercio_id           String     @db.Uuid
+  nombre                String
+  email                 String     @unique
+  password              String
+  telefono              String
+  rol                   RolUsuario
+  matricula_profesional String?
+  biografia             String?
+  porcentaje_comision   Decimal    @db.Decimal(10, 2)
+  activo                Boolean    @default(true)
+
+  comercio    Comercio     @relation(fields: [comercio_id], references: [id])
+  horarios    Horario[]
+  turnos      Turno[]
+  fichas      Ficha[]
+  movimientos Movimiento[]
+
+  @@map("usuarios")
+}
+
+model Horario {
+  id          String   @id @default(uuid()) @db.Uuid
+  usuario_id  String   @db.Uuid
+  dia_semana  Int
+  hora_inicio DateTime @db.Time(0)
+  hora_fin    DateTime @db.Time(0)
+
+  usuario Usuario @relation(fields: [usuario_id], references: [id])
+
+  @@map("horarios")
+}
+
+model Servicio {
+  id               String            @id @default(uuid()) @db.Uuid
+  comercio_id      String            @db.Uuid
+  nombre           String
+  duracion_minutos Int
+  precio           Decimal           @db.Decimal(10, 2)
+  modalidad        ModalidadServicio
+
+  comercio Comercio @relation(fields: [comercio_id], references: [id])
+  turnos   Turno[]
+
+  @@map("servicios")
+}
+
+model Cliente {
+  id        String @id @default(uuid()) @db.Uuid
+  nombre    String
+  apellido  String
+  email     String @unique
+  password  String
+  telefono  String @unique
+
+  turnos Turno[]
+  fichas Ficha[]
+
+  @@map("clientes")
+}
+
+model Turno {
+  id              String      @id @default(uuid()) @db.Uuid
+  comercio_id     String      @db.Uuid
+  cliente_id      String      @db.Uuid
+  profesional_id  String      @db.Uuid
+  servicio_id     String      @db.Uuid
+  link_reunion    String?
+  estado          EstadoTurno
+  fecha_hora      DateTime
+
+  comercio       Comercio       @relation(fields: [comercio_id], references: [id])
+  cliente        Cliente        @relation(fields: [cliente_id], references: [id])
+  profesional    Usuario        @relation(fields: [profesional_id], references: [id])
+  servicio       Servicio       @relation(fields: [servicio_id], references: [id])
+  movimientos    Movimiento[]
+  notificaciones Notificacion[]
+
+  @@map("turnos")
+}
+
+model Ficha {
+  id              String   @id @default(uuid()) @db.Uuid
+  comercio_id     String   @db.Uuid
+  cliente_id      String   @db.Uuid
+  profesional_id  String   @db.Uuid
+  fecha           DateTime
+  datos_dinamicos Json
+
+  comercio    Comercio @relation(fields: [comercio_id], references: [id])
+  cliente     Cliente  @relation(fields: [cliente_id], references: [id])
+  profesional Usuario  @relation(fields: [profesional_id], references: [id])
+
+  @@map("fichas")
+}
+
+model Movimiento {
+  id                         String         @id @default(uuid()) @db.Uuid
+  comercio_id                String         @db.Uuid
+  turno_id                   String?        @db.Uuid
+  profesional_id             String         @db.Uuid
+  tipo                       TipoMovimiento
+  monto                      Decimal        @db.Decimal(10, 2)
+  metodo_pago                MetodoPago
+  concepto                   String
+  monto_comision_profesional Decimal        @db.Decimal(10, 2)
+  fecha                      DateTime
+
+  comercio    Comercio @relation(fields: [comercio_id], references: [id])
+  turno       Turno?   @relation(fields: [turno_id], references: [id])
+  profesional Usuario  @relation(fields: [profesional_id], references: [id])
+
+  @@map("movimientos")
+}
+
+model Notificacion {
+  id                 String             @id @default(uuid()) @db.Uuid
+  comercio_id        String             @db.Uuid
+  turno_id           String             @db.Uuid
+  canal_notificacion CanalNotificacion
+  destinatario       String
+  plantilla_nombre   String
+  datos_variables    Json
+  fecha_programada   DateTime
+  estado             EstadoNotificacion
+  intentos           Int                @default(0)
+  error_log          String?
+
+  comercio Comercio @relation(fields: [comercio_id], references: [id])
+  turno    Turno    @relation(fields: [turno_id], references: [id])
+
+  @@map("notificaciones")
+}
