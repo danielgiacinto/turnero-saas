@@ -18,6 +18,7 @@ enum TipoRubro {
 }
 
 enum RolUsuario {
+  super_admin
   admin
   profesional
 }
@@ -62,6 +63,12 @@ enum MetodoPago {
   transferencia
 }
 
+enum EstadoInvitacion {
+  pendiente
+  aceptada
+  expirada
+}
+
 model Comercio {
   id                 String            @id @default(uuid()) @db.Uuid
   nombre             String
@@ -80,29 +87,32 @@ model Comercio {
   turnos         Turno[]
   fichas         Ficha[]
   movimientos    Movimiento[]
-  notificaciones Notificacion[]
+  notificaciones      Notificacion[]
+  invitaciones        InvitacionProfesional[]
 
   @@map("comercios")
 }
 
 model Usuario {
   id                    String     @id @default(uuid()) @db.Uuid
-  comercio_id           String     @db.Uuid
+  comercio_id           String?    @db.Uuid
   nombre                String
   email                 String     @unique
-  password              String
-  telefono              String
+  password              String?
+  google_id             String?    @unique
+  telefono              String?
   rol                   RolUsuario
   matricula_profesional String?
   biografia             String?
-  porcentaje_comision   Decimal    @db.Decimal(10, 2)
+  porcentaje_comision   Decimal    @default(0) @db.Decimal(10, 2)
   activo                Boolean    @default(true)
 
-  comercio    Comercio     @relation(fields: [comercio_id], references: [id])
-  horarios    Horario[]
-  turnos      Turno[]
-  fichas      Ficha[]
-  movimientos Movimiento[]
+  comercio              Comercio?               @relation(fields: [comercio_id], references: [id])
+  horarios              Horario[]
+  turnos                Turno[]
+  fichas                Ficha[]
+  movimientos           Movimiento[]
+  invitaciones_enviadas InvitacionProfesional[]
 
   @@map("usuarios")
 }
@@ -134,12 +144,11 @@ model Servicio {
 }
 
 model Cliente {
-  id        String @id @default(uuid()) @db.Uuid
-  nombre    String
-  apellido  String
-  email     String @unique
-  password  String
-  telefono  String @unique
+  id       String @id @default(uuid()) @db.Uuid
+  nombre   String
+  apellido String
+  email    String @unique
+  telefono String @unique
 
   turnos Turno[]
   fichas Ficha[]
@@ -218,4 +227,20 @@ model Notificacion {
   turno    Turno    @relation(fields: [turno_id], references: [id])
 
   @@map("notificaciones")
+}
+
+model InvitacionProfesional {
+  id              String           @id @default(uuid()) @db.Uuid
+  comercio_id     String           @db.Uuid
+  email           String
+  token           String           @unique
+  estado          EstadoInvitacion @default(pendiente)
+  invitado_por_id String           @db.Uuid
+  expira_en       DateTime
+  created_at      DateTime         @default(now())
+
+  comercio     Comercio @relation(fields: [comercio_id], references: [id])
+  invitado_por Usuario  @relation(fields: [invitado_por_id], references: [id])
+
+  @@map("invitaciones_profesional")
 }
