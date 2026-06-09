@@ -10,7 +10,8 @@ async function iniciarServidor(): Promise<void> {
   });
 
   if (!env.databaseUrl) {
-    console.warn('DATABASE_URL no configurada. Copiá backend/.env.example a backend/.env');
+    console.warn('DATABASE_URL no configurada.');
+    console.warn('Creá backend/.env con PORT, NODE_ENV, DATABASE_URL y DIRECT_URL.');
     return;
   }
 
