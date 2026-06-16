@@ -24,10 +24,41 @@ enum RolUsuario {
 }
 
 enum EstadoTurno {
+  pendiente_verificacion
   pendiente
   completo
   cancelado
   inasistencia
+}
+
+enum OrigenReserva {
+  portal_publico
+  panel_staff
+}
+
+enum ConfirmacionAsistencia {
+  no_requerida
+  pendiente
+  confirmada
+  rechazada
+  expirada
+}
+
+enum PropositoVerificacion {
+  registro_cliente
+  acceso_portal
+  reenvio_identidad
+}
+
+enum CanalVerificacion {
+  email
+  whatsapp
+  sms
+}
+
+enum PoliticaNoConfirmacion {
+  cancelar
+  mantener
 }
 
 enum EstadoSuscripcion {
@@ -70,25 +101,30 @@ enum EstadoInvitacion {
 }
 
 model Comercio {
-  id                 String            @id @default(uuid()) @db.Uuid
-  nombre             String
-  url                String            @unique
-  estado_suscripcion EstadoSuscripcion
-  direccion          String?
-  barrio             String
-  rubro              TipoRubro
-  fecha_vencimiento  DateTime
-  created_at         DateTime          @default(now())
-  mp_preapproval_id  String?
-  logo_url           String?
+  id                                 String                 @id @default(uuid()) @db.Uuid
+  nombre                             String
+  url                                String                 @unique
+  estado_suscripcion                 EstadoSuscripcion
+  direccion                          String?
+  barrio                             String
+  rubro                              TipoRubro
+  fecha_vencimiento                  DateTime
+  created_at                         DateTime               @default(now())
+  mp_preapproval_id                  String?
+  logo_url                           String?
+  requiere_confirmacion_asistencia   Boolean                @default(true)
+  horas_anticipacion_confirmacion    Int                    @default(24)
+  minutos_hold_reserva_sin_verificar Int                    @default(15)
+  minutos_expiracion_codigo_otp      Int                    @default(10)
+  politica_no_confirmacion           PoliticaNoConfirmacion @default(cancelar)
 
   usuarios       Usuario[]
   servicios      Servicio[]
   turnos         Turno[]
   fichas         Ficha[]
   movimientos    Movimiento[]
-  notificaciones      Notificacion[]
-  invitaciones        InvitacionProfesional[]
+  notificaciones Notificacion[]
+  invitaciones   Invitacion[]
 
   @@map("comercios")
 }
@@ -107,12 +143,13 @@ model Usuario {
   porcentaje_comision   Decimal    @default(0) @db.Decimal(10, 2)
   activo                Boolean    @default(true)
 
-  comercio              Comercio?               @relation(fields: [comercio_id], references: [id])
-  horarios              Horario[]
-  turnos                Turno[]
-  fichas                Ficha[]
-  movimientos           Movimiento[]
-  invitaciones_enviadas InvitacionProfesional[]
+  comercio       Comercio?    @relation(fields: [comercio_id], references: [id])
+  horarios       Horario[]
+  turnos         Turno[]
+  turnos_creados Turno[]      @relation("TurnosCreadosPorStaff")
+  fichas         Ficha[]
+  movimientos    Movimiento[]
+  invitaciones   Invitacion[]
 
   @@map("usuarios")
 }
@@ -144,45 +181,67 @@ model Servicio {
 }
 
 model Cliente {
-  id       String @id @default(uuid()) @db.Uuid
-  nombre   String
-  apellido String
-  email    String @unique
-  telefono String @unique
+  id                        String    @id @default(uuid()) @db.Uuid
+  nombre                    String
+  apellido                  String
+  email                     String    @unique
+  telefono                  String
+  email_verificado          Boolean   @default(false)
+  telefono_verificado       Boolean   @default(false)
+  email_verificado_fecha    DateTime?
+  telefono_verificado_fecha DateTime?
+  token_acceso_portal       String?   @unique
 
-  turnos Turno[]
-  fichas Ficha[]
+  turnos         Turno[]
+  fichas         Ficha[]
+  verificaciones Verificacion[]
+  notificaciones Notificacion[]
 
+  @@index([telefono])
   @@map("clientes")
 }
 
 model Turno {
-  id              String      @id @default(uuid()) @db.Uuid
-  comercio_id     String      @db.Uuid
-  cliente_id      String      @db.Uuid
-  profesional_id  String      @db.Uuid
-  servicio_id     String      @db.Uuid
-  link_reunion    String?
-  estado          EstadoTurno
-  fecha_hora      DateTime
+  id                             String                 @id @default(uuid()) @db.Uuid
+  comercio_id                    String                 @db.Uuid
+  cliente_id                     String                 @db.Uuid
+  profesional_id                 String                 @db.Uuid
+  servicio_id                    String                 @db.Uuid
+  link_reunion                   String?
+  estado                         EstadoTurno
+  origen_reserva                 OrigenReserva
+  creado_por_usuario_id          String?                @db.Uuid
+  fecha_hora                     DateTime
+  reserva_expira_fecha           DateTime?
+  confirmacion_asistencia        ConfirmacionAsistencia @default(no_requerida)
+  confirmacion_asistencia_fecha  DateTime?
+  limite_confirmacion_asistencia DateTime?
 
   comercio       Comercio       @relation(fields: [comercio_id], references: [id])
   cliente        Cliente        @relation(fields: [cliente_id], references: [id])
   profesional    Usuario        @relation(fields: [profesional_id], references: [id])
   servicio       Servicio       @relation(fields: [servicio_id], references: [id])
+  creado_por     Usuario?       @relation("TurnosCreadosPorStaff", fields: [creado_por_usuario_id], references: [id])
   movimientos    Movimiento[]
   notificaciones Notificacion[]
+  verificaciones Verificacion[]
 
+  @@index([profesional_id, fecha_hora])
+  @@index([comercio_id, estado])
   @@map("turnos")
 }
 
 model Ficha {
-  id              String   @id @default(uuid()) @db.Uuid
-  comercio_id     String   @db.Uuid
-  cliente_id      String   @db.Uuid
-  profesional_id  String   @db.Uuid
-  fecha           DateTime
-  datos_dinamicos Json
+  id                String    @id @default(uuid()) @db.Uuid
+  comercio_id       String    @db.Uuid
+  cliente_id        String    @db.Uuid
+  profesional_id    String    @db.Uuid
+  fecha             DateTime
+  datos_dinamicos   Json
+  visible_cliente   Boolean   @default(false)
+  titulo_cliente    String?
+  contenido_cliente Json?
+  publicado_fecha   DateTime?
 
   comercio    Comercio @relation(fields: [comercio_id], references: [id])
   cliente     Cliente  @relation(fields: [cliente_id], references: [id])
@@ -212,8 +271,9 @@ model Movimiento {
 
 model Notificacion {
   id                 String             @id @default(uuid()) @db.Uuid
-  comercio_id        String             @db.Uuid
-  turno_id           String             @db.Uuid
+  comercio_id        String?            @db.Uuid
+  turno_id           String?            @db.Uuid
+  cliente_id         String?            @db.Uuid
   canal_notificacion CanalNotificacion
   destinatario       String
   plantilla_nombre   String
@@ -223,24 +283,47 @@ model Notificacion {
   intentos           Int                @default(0)
   error_log          String?
 
-  comercio Comercio @relation(fields: [comercio_id], references: [id])
-  turno    Turno    @relation(fields: [turno_id], references: [id])
+  comercio Comercio? @relation(fields: [comercio_id], references: [id])
+  turno    Turno?    @relation(fields: [turno_id], references: [id])
+  cliente  Cliente?  @relation(fields: [cliente_id], references: [id])
 
+  @@index([estado, fecha_programada])
   @@map("notificaciones")
 }
 
-model InvitacionProfesional {
-  id              String           @id @default(uuid()) @db.Uuid
-  comercio_id     String           @db.Uuid
-  email           String
-  token           String           @unique
-  estado          EstadoInvitacion @default(pendiente)
-  invitado_por_id String           @db.Uuid
-  expira_en       DateTime
-  created_at      DateTime         @default(now())
+model Verificacion {
+  id           String                @id @default(uuid()) @db.Uuid
+  cliente_id   String?               @db.Uuid
+  turno_id     String?               @db.Uuid
+  email        String?
+  telefono     String?
+  codigo_hash  String
+  proposito    PropositoVerificacion
+  canal        CanalVerificacion
+  intentos     Int                   @default(0)
+  max_intentos Int                   @default(5)
+  expira_fecha DateTime
+  usado_fecha  DateTime?
+  created_at   DateTime              @default(now())
 
-  comercio     Comercio @relation(fields: [comercio_id], references: [id])
-  invitado_por Usuario  @relation(fields: [invitado_por_id], references: [id])
+  cliente Cliente? @relation(fields: [cliente_id], references: [id])
+  turno   Turno?   @relation(fields: [turno_id], references: [id])
 
-  @@map("invitaciones_profesional")
+  @@map("verificaciones")
+}
+
+model Invitacion {
+  id          String           @id @default(uuid()) @db.Uuid
+  comercio_id String           @db.Uuid
+  email       String
+  token       String           @unique
+  estado      EstadoInvitacion @default(pendiente)
+  usuario_id  String?          @db.Uuid
+  expiration  DateTime
+  created_at  DateTime         @default(now())
+
+  comercio Comercio @relation(fields: [comercio_id], references: [id])
+  usuario  Usuario? @relation(fields: [usuario_id], references: [id])
+
+  @@map("invitaciones")
 }
