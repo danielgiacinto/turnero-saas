@@ -29,3 +29,17 @@ export class ErrorNoAutorizado extends ErrorApp {
     this.name = 'ErrorNoAutorizado';
   }
 }
+
+/**
+ * Se lanza cuando una cuenta de staff intenta ingresar sin haber verificado su correo.
+ * El `detalle.codigo` permite al front redirigir a la pantalla de verificación.
+ */
+export class ErrorEmailNoVerificado extends ErrorApp {
+  constructor(emailEnmascarado: string) {
+    super('Tenés que verificar tu correo antes de ingresar.', 403, {
+      codigo: 'email_no_verificado',
+      email: emailEnmascarado,
+    });
+    this.name = 'ErrorEmailNoVerificado';
+  }
+}

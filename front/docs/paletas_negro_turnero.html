@@ -1,0 +1,387 @@
+
+<style>
+  .root { padding: 1rem 0; display: flex; flex-direction: column; gap: 2rem; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+  .card-head { padding: 1rem 1.25rem 0.75rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .card-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 3px; }
+  .card-sub { font-size: 13px; color: var(--color-text-secondary); margin: 0; }
+  .card-body { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+  .mode-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--color-text-tertiary); margin-bottom: 8px; text-transform: uppercase; }
+  .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+  .sw { border-radius: 8px; padding: 8px 12px; flex: 1; min-width: 90px; }
+  .sw-role { font-size: 11px; font-weight: 500; margin-bottom: 2px; }
+  .sw-hex { font-size: 11px; font-family: monospace; }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 0; }
+  .preview { border-radius: 8px; padding: 12px 14px; margin-top: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .preview-text { font-size: 14px; font-weight: 500; margin: 0; }
+  .preview-sub { font-size: 12px; margin: 2px 0 0; }
+  .states { display: flex; gap: 5px; flex-wrap: wrap; }
+  .pill { border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 500; }
+  .btn { border: none; border-radius: 6px; padding: 6px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .why { background: var(--color-background-secondary); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--color-text-secondary); }
+  .mini-ui { border-radius: 10px; overflow: hidden; margin-top: 4px; }
+  .mini-sidebar { width: 140px; padding: 12px 10px; display: flex; flex-direction: column; gap: 4px; }
+  .mini-nav { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+  .mini-content { flex: 1; padding: 12px; }
+  .mini-stat { border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .mini-stat-num { font-size: 20px; font-weight: 500; margin: 0; }
+  .mini-stat-lbl { font-size: 11px; margin: 2px 0 0; }
+</style>
+
+<div class="root">
+
+  <!-- PALETA 1: Negro + Lima eléctrico -->
+  <div class="card">
+    <div class="card-head">
+      <p class="card-title">1 — Negro & lima eléctrico</p>
+      <p class="card-sub">Base negra pura con acento verde lima. Alta energía, aspecto premium moderno.</p>
+    </div>
+    <div class="card-body">
+      <div>
+        <p class="mode-label">☀ Modo claro</p>
+        <div class="swatches">
+          <div class="sw" style="background:#F7F7F5;">
+            <div class="sw-role" style="color:#111;">Fondo</div>
+            <div class="sw-hex" style="color:#555;">#F7F7F5</div>
+          </div>
+          <div class="sw" style="background:#111111;">
+            <div class="sw-role" style="color:#F7F7F5;">Primario</div>
+            <div class="sw-hex" style="color:#aaa;">#111111</div>
+          </div>
+          <div class="sw" style="background:#C8F135;">
+            <div class="sw-role" style="color:#1A2A00;">Acento lima</div>
+            <div class="sw-hex" style="color:#2A3A00;">#C8F135</div>
+          </div>
+          <div class="sw" style="background:#FFFFFF; border:0.5px solid #DDD;">
+            <div class="sw-role" style="color:#111;">Superficie</div>
+            <div class="sw-hex" style="color:#555;">#FFFFFF</div>
+          </div>
+          <div class="sw" style="background:#444444;">
+            <div class="sw-role" style="color:#CCC;">Muted</div>
+            <div class="sw-hex" style="color:#AAA;">#444444</div>
+          </div>
+        </div>
+        <div class="preview" style="background:#F7F7F5; border:0.5px solid #E0E0DC;">
+          <div>
+            <p class="preview-text" style="color:#111;">Turno — Marcela Ruiz</p>
+            <p class="preview-sub" style="color:#666;">Hoy 15:00 · Corte y barba</p>
+          </div>
+          <div class="states">
+            <span class="pill" style="background:#D1FAE5; color:#065F46;">Confirmado</span>
+            <span class="pill" style="background:#FEF3C7; color:#92400E;">Pendiente</span>
+            <span class="pill" style="background:#FEE2E2; color:#991B1B;">Cancelado</span>
+          </div>
+          <button class="btn" style="background:#111; color:#C8F135;">Reservar</button>
+        </div>
+      </div>
+      <hr class="divider">
+      <div>
+        <p class="mode-label">🌙 Modo oscuro</p>
+        <div class="swatches">
+          <div class="sw" style="background:#0A0A0A;">
+            <div class="sw-role" style="color:#aaa;">Fondo</div>
+            <div class="sw-hex" style="color:#666;">#0A0A0A</div>
+          </div>
+          <div class="sw" style="background:#1A1A1A;">
+            <div class="sw-role" style="color:#ccc;">Superficie</div>
+            <div class="sw-hex" style="color:#888;">#1A1A1A</div>
+          </div>
+          <div class="sw" style="background:#C8F135;">
+            <div class="sw-role" style="color:#1A2A00;">Acento lima</div>
+            <div class="sw-hex" style="color:#2A3A00;">#C8F135</div>
+          </div>
+          <div class="sw" style="background:#2A2A2A;">
+            <div class="sw-role" style="color:#bbb;">Borde/hover</div>
+            <div class="sw-hex" style="color:#777;">#2A2A2A</div>
+          </div>
+          <div class="sw" style="background:#888888;">
+            <div class="sw-role" style="color:#1A1A1A;">Muted</div>
+            <div class="sw-hex" style="color:#333;">#888888</div>
+          </div>
+        </div>
+        <div class="preview" style="background:#1A1A1A; border:0.5px solid #2A2A2A;">
+          <div>
+            <p class="preview-text" style="color:#F0F0F0;">Turno — Marcela Ruiz</p>
+            <p class="preview-sub" style="color:#888;">Hoy 15:00 · Corte y barba</p>
+          </div>
+          <div class="states">
+            <span class="pill" style="background:#052E16; color:#6EE7B7;">Confirmado</span>
+            <span class="pill" style="background:#3B2A00; color:#FDE68A;">Pendiente</span>
+            <span class="pill" style="background:#450A0A; color:#FCA5A5;">Cancelado</span>
+          </div>
+          <button class="btn" style="background:#C8F135; color:#0A0A0A;">Reservar</button>
+        </div>
+      </div>
+      <div class="mini-ui" style="background:#111; display:flex;">
+        <div class="mini-sidebar" style="background:#0A0A0A; border-right:0.5px solid #222;">
+          <div style="color:#C8F135; font-size:12px; font-weight:500; padding:6px 8px; margin-bottom:4px;">turnero</div>
+          <div class="mini-nav" style="background:#1E1E1E; color:#F0F0F0;"><i class="ti ti-calendar" style="font-size:14px;" aria-hidden="true"></i> Agenda</div>
+          <div class="mini-nav" style="color:#888;"><i class="ti ti-users" style="font-size:14px;" aria-hidden="true"></i> Clientes</div>
+          <div class="mini-nav" style="color:#888;"><i class="ti ti-chart-bar" style="font-size:14px;" aria-hidden="true"></i> Reportes</div>
+          <div class="mini-nav" style="color:#888;"><i class="ti ti-settings" style="font-size:14px;" aria-hidden="true"></i> Config.</div>
+        </div>
+        <div class="mini-content" style="flex:1;">
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <div class="mini-stat" style="flex:1; background:#1A1A1A;">
+              <p class="mini-stat-num" style="color:#C8F135;">12</p>
+              <p class="mini-stat-lbl" style="color:#666;">Hoy</p>
+            </div>
+            <div class="mini-stat" style="flex:1; background:#1A1A1A;">
+              <p class="mini-stat-num" style="color:#F0F0F0;">3</p>
+              <p class="mini-stat-lbl" style="color:#666;">Pendientes</p>
+            </div>
+            <div class="mini-stat" style="flex:1; background:#1A1A1A;">
+              <p class="mini-stat-num" style="color:#F0F0F0;">87%</p>
+              <p class="mini-stat-lbl" style="color:#666;">Asistencia</p>
+            </div>
+          </div>
+          <div style="background:#1A1A1A; border-radius:6px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p style="font-size:12px; font-weight:500; color:#F0F0F0; margin:0;">Sofía Méndez</p>
+              <p style="font-size:11px; color:#666; margin:2px 0 0;">14:30 · Coloración</p>
+            </div>
+            <span class="pill" style="background:#052E16; color:#6EE7B7; font-size:11px;">Confirmado</span>
+          </div>
+        </div>
+      </div>
+      <div class="why">Por qué funciona: negro + lima es la combo que usan marcas premium de moda y tecnología (Vercel, Linear, Arc). Muy lejos de cualquier SaaS genérico. El lima resalta solo lo importante, los estados semánticos no chocan porque son colores suaves sobre superficies oscuras.</div>
+    </div>
+  </div>
+
+  <!-- PALETA 2: Negro + Naranja quemado -->
+  <div class="card">
+    <div class="card-head">
+      <p class="card-title">2 — Negro & naranja quemado</p>
+      <p class="card-sub">Elegante y audaz. Naranja cobre como único acento sobre negro mate.</p>
+    </div>
+    <div class="card-body">
+      <div>
+        <p class="mode-label">☀ Modo claro</p>
+        <div class="swatches">
+          <div class="sw" style="background:#F8F5F2;">
+            <div class="sw-role" style="color:#111;">Fondo</div>
+            <div class="sw-hex" style="color:#555;">#F8F5F2</div>
+          </div>
+          <div class="sw" style="background:#0F0F0F;">
+            <div class="sw-role" style="color:#F8F5F2;">Primario</div>
+            <div class="sw-hex" style="color:#aaa;">#0F0F0F</div>
+          </div>
+          <div class="sw" style="background:#D95F1A;">
+            <div class="sw-role" style="color:#FFF5EE;">Naranja cobre</div>
+            <div class="sw-hex" style="color:#FFF5EE;">#D95F1A</div>
+          </div>
+          <div class="sw" style="background:#FFFFFF; border:0.5px solid #E8E0D8;">
+            <div class="sw-role" style="color:#111;">Superficie</div>
+            <div class="sw-hex" style="color:#555;">#FFFFFF</div>
+          </div>
+          <div class="sw" style="background:#E8DDD5;">
+            <div class="sw-role" style="color:#333;">Beige borde</div>
+            <div class="sw-hex" style="color:#555;">#E8DDD5</div>
+          </div>
+        </div>
+        <div class="preview" style="background:#F8F5F2; border:0.5px solid #E0D8CE;">
+          <div>
+            <p class="preview-text" style="color:#0F0F0F;">Turno — Marcela Ruiz</p>
+            <p class="preview-sub" style="color:#7A6A5A;">Hoy 15:00 · Masaje relajante</p>
+          </div>
+          <div class="states">
+            <span class="pill" style="background:#D1FAE5; color:#065F46;">Confirmado</span>
+            <span class="pill" style="background:#FEF3C7; color:#92400E;">Pendiente</span>
+            <span class="pill" style="background:#FEE2E2; color:#991B1B;">Cancelado</span>
+          </div>
+          <button class="btn" style="background:#0F0F0F; color:#D95F1A;">Reservar</button>
+        </div>
+      </div>
+      <hr class="divider">
+      <div>
+        <p class="mode-label">🌙 Modo oscuro</p>
+        <div class="swatches">
+          <div class="sw" style="background:#080808;">
+            <div class="sw-role" style="color:#aaa;">Fondo</div>
+            <div class="sw-hex" style="color:#666;">#080808</div>
+          </div>
+          <div class="sw" style="background:#161616;">
+            <div class="sw-role" style="color:#ccc;">Superficie</div>
+            <div class="sw-hex" style="color:#888;">#161616</div>
+          </div>
+          <div class="sw" style="background:#E8702A;">
+            <div class="sw-role" style="color:#1A0800;">Naranja</div>
+            <div class="sw-hex" style="color:#1A0800;">#E8702A</div>
+          </div>
+          <div class="sw" style="background:#242424;">
+            <div class="sw-role" style="color:#bbb;">Borde</div>
+            <div class="sw-hex" style="color:#777;">#242424</div>
+          </div>
+          <div class="sw" style="background:#777;">
+            <div class="sw-role" style="color:#1A1A1A;">Muted</div>
+            <div class="sw-hex" style="color:#222;">#777777</div>
+          </div>
+        </div>
+        <div class="preview" style="background:#161616; border:0.5px solid #242424;">
+          <div>
+            <p class="preview-text" style="color:#F0EDE8;">Turno — Marcela Ruiz</p>
+            <p class="preview-sub" style="color:#888;">Hoy 15:00 · Masaje relajante</p>
+          </div>
+          <div class="states">
+            <span class="pill" style="background:#052E16; color:#6EE7B7;">Confirmado</span>
+            <span class="pill" style="background:#3B2A00; color:#FDE68A;">Pendiente</span>
+            <span class="pill" style="background:#450A0A; color:#FCA5A5;">Cancelado</span>
+          </div>
+          <button class="btn" style="background:#E8702A; color:#080808;">Reservar</button>
+        </div>
+      </div>
+      <div class="mini-ui" style="background:#0F0F0F; display:flex;">
+        <div class="mini-sidebar" style="background:#080808; border-right:0.5px solid #1E1E1E;">
+          <div style="color:#D95F1A; font-size:12px; font-weight:500; padding:6px 8px; margin-bottom:4px;">turnero</div>
+          <div class="mini-nav" style="background:#1A1A1A; color:#F0EDE8;"><i class="ti ti-calendar" style="font-size:14px;" aria-hidden="true"></i> Agenda</div>
+          <div class="mini-nav" style="color:#666;"><i class="ti ti-users" style="font-size:14px;" aria-hidden="true"></i> Clientes</div>
+          <div class="mini-nav" style="color:#666;"><i class="ti ti-chart-bar" style="font-size:14px;" aria-hidden="true"></i> Reportes</div>
+          <div class="mini-nav" style="color:#666;"><i class="ti ti-settings" style="font-size:14px;" aria-hidden="true"></i> Config.</div>
+        </div>
+        <div class="mini-content" style="flex:1;">
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <div class="mini-stat" style="flex:1; background:#1A1A1A;">
+              <p class="mini-stat-num" style="color:#E8702A;">12</p>
+              <p class="mini-stat-lbl" style="color:#555;">Hoy</p>
+            </div>
+            <div class="mini-stat" style="flex:1; background:#1A1A1A;">
+              <p class="mini-stat-num" style="color:#F0EDE8;">3</p>
+              <p class="mini-stat-lbl" style="color:#555;">Pendientes</p>
+            </div>
+            <div class="mini-stat" style="flex:1; background:#1A1A1A;">
+              <p class="mini-stat-num" style="color:#F0EDE8;">87%</p>
+              <p class="mini-stat-lbl" style="color:#555;">Asistencia</p>
+            </div>
+          </div>
+          <div style="background:#1A1A1A; border-radius:6px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p style="font-size:12px; font-weight:500; color:#F0EDE8; margin:0;">Sofía Méndez</p>
+              <p style="font-size:11px; color:#666; margin:2px 0 0;">14:30 · Coloración</p>
+            </div>
+            <span class="pill" style="background:#052E16; color:#6EE7B7; font-size:11px;">Confirmado</span>
+          </div>
+        </div>
+      </div>
+      <div class="why">Por qué funciona: el naranja cobre da calidez sin caer en lo festivo. Funciona igual de bien para barberías, estética y salud. En light mode el fondo es ligeramente crema (no blanco puro), lo que suaviza el contraste y se siente más artesanal.</div>
+    </div>
+  </div>
+
+  <!-- PALETA 3: Negro + Violeta neón apagado -->
+  <div class="card">
+    <div class="card-head">
+      <p class="card-title">3 — Negro & violeta</p>
+      <p class="card-sub">Negro mate con violeta desaturado. Sofisticado, tech, muy distinto al SaaS típico.</p>
+    </div>
+    <div class="card-body">
+      <div>
+        <p class="mode-label">☀ Modo claro</p>
+        <div class="swatches">
+          <div class="sw" style="background:#F6F5F9;">
+            <div class="sw-role" style="color:#111;">Fondo</div>
+            <div class="sw-hex" style="color:#555;">#F6F5F9</div>
+          </div>
+          <div class="sw" style="background:#111111;">
+            <div class="sw-role" style="color:#F6F5F9;">Primario</div>
+            <div class="sw-hex" style="color:#aaa;">#111111</div>
+          </div>
+          <div class="sw" style="background:#7C5CBF;">
+            <div class="sw-role" style="color:#F0ECFF;">Violeta</div>
+            <div class="sw-hex" style="color:#F0ECFF;">#7C5CBF</div>
+          </div>
+          <div class="sw" style="background:#FFFFFF; border:0.5px solid #E2DFEE;">
+            <div class="sw-role" style="color:#111;">Superficie</div>
+            <div class="sw-hex" style="color:#555;">#FFFFFF</div>
+          </div>
+          <div class="sw" style="background:#A98EE0;">
+            <div class="sw-role" style="color:#1A0A40;">Acento claro</div>
+            <div class="sw-hex" style="color:#1A0A40;">#A98EE0</div>
+          </div>
+        </div>
+        <div class="preview" style="background:#F6F5F9; border:0.5px solid #DDD9EE;">
+          <div>
+            <p class="preview-text" style="color:#111;">Turno — Marcela Ruiz</p>
+            <p class="preview-sub" style="color:#6A6480;">Hoy 15:00 · Sesión psicología</p>
+          </div>
+          <div class="states">
+            <span class="pill" style="background:#D1FAE5; color:#065F46;">Confirmado</span>
+            <span class="pill" style="background:#FEF3C7; color:#92400E;">Pendiente</span>
+            <span class="pill" style="background:#FEE2E2; color:#991B1B;">Cancelado</span>
+          </div>
+          <button class="btn" style="background:#111; color:#A98EE0;">Reservar</button>
+        </div>
+      </div>
+      <hr class="divider">
+      <div>
+        <p class="mode-label">🌙 Modo oscuro</p>
+        <div class="swatches">
+          <div class="sw" style="background:#090910;">
+            <div class="sw-role" style="color:#aaa;">Fondo</div>
+            <div class="sw-hex" style="color:#666;">#090910</div>
+          </div>
+          <div class="sw" style="background:#14131F;">
+            <div class="sw-role" style="color:#ccc;">Superficie</div>
+            <div class="sw-hex" style="color:#888;">#14131F</div>
+          </div>
+          <div class="sw" style="background:#9B7ED4;">
+            <div class="sw-role" style="color:#090910;">Violeta</div>
+            <div class="sw-hex" style="color:#090910;">#9B7ED4</div>
+          </div>
+          <div class="sw" style="background:#1E1C2E;">
+            <div class="sw-role" style="color:#bbb;">Borde</div>
+            <div class="sw-hex" style="color:#777;">#1E1C2E</div>
+          </div>
+          <div class="sw" style="background:#3D3660;">
+            <div class="sw-role" style="color:#C4B8F0;">Hover</div>
+            <div class="sw-hex" style="color:#C4B8F0;">#3D3660</div>
+          </div>
+        </div>
+        <div class="preview" style="background:#14131F; border:0.5px solid #1E1C2E;">
+          <div>
+            <p class="preview-text" style="color:#EEECf8;">Turno — Marcela Ruiz</p>
+            <p class="preview-sub" style="color:#7870A0;">Hoy 15:00 · Sesión psicología</p>
+          </div>
+          <div class="states">
+            <span class="pill" style="background:#052E16; color:#6EE7B7;">Confirmado</span>
+            <span class="pill" style="background:#3B2A00; color:#FDE68A;">Pendiente</span>
+            <span class="pill" style="background:#450A0A; color:#FCA5A5;">Cancelado</span>
+          </div>
+          <button class="btn" style="background:#9B7ED4; color:#090910;">Reservar</button>
+        </div>
+      </div>
+      <div class="mini-ui" style="background:#111; display:flex;">
+        <div class="mini-sidebar" style="background:#090910; border-right:0.5px solid #1E1C2E;">
+          <div style="color:#9B7ED4; font-size:12px; font-weight:500; padding:6px 8px; margin-bottom:4px;">turnero</div>
+          <div class="mini-nav" style="background:#1E1C2E; color:#EEEAF8;"><i class="ti ti-calendar" style="font-size:14px;" aria-hidden="true"></i> Agenda</div>
+          <div class="mini-nav" style="color:#555;"><i class="ti ti-users" style="font-size:14px;" aria-hidden="true"></i> Clientes</div>
+          <div class="mini-nav" style="color:#555;"><i class="ti ti-chart-bar" style="font-size:14px;" aria-hidden="true"></i> Reportes</div>
+          <div class="mini-nav" style="color:#555;"><i class="ti ti-settings" style="font-size:14px;" aria-hidden="true"></i> Config.</div>
+        </div>
+        <div class="mini-content" style="flex:1;">
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <div class="mini-stat" style="flex:1; background:#1A1828;">
+              <p class="mini-stat-num" style="color:#9B7ED4;">12</p>
+              <p class="mini-stat-lbl" style="color:#555;">Hoy</p>
+            </div>
+            <div class="mini-stat" style="flex:1; background:#1A1828;">
+              <p class="mini-stat-num" style="color:#EEEAF8;">3</p>
+              <p class="mini-stat-lbl" style="color:#555;">Pendientes</p>
+            </div>
+            <div class="mini-stat" style="flex:1; background:#1A1828;">
+              <p class="mini-stat-num" style="color:#EEEAF8;">87%</p>
+              <p class="mini-stat-lbl" style="color:#555;">Asistencia</p>
+            </div>
+          </div>
+          <div style="background:#1A1828; border-radius:6px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p style="font-size:12px; font-weight:500; color:#EEEAF8; margin:0;">Sofía Méndez</p>
+              <p style="font-size:11px; color:#666; margin:2px 0 0;">14:30 · Nutrición</p>
+            </div>
+            <span class="pill" style="background:#052E16; color:#6EE7B7; font-size:11px;">Confirmado</span>
+          </div>
+        </div>
+      </div>
+      <div class="why">Por qué funciona: el negro ligeramente azulado (#090910) en dark mode da profundidad sin ser plano. El violeta desaturado es único en el mundo del turnero/agenda, especialmente para psicólogos, nutricionistas o cualquier rubro que quiera transmitir calma y modernidad.</div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,39 @@
+// Paleta 2 — Negro & naranja quemado
+
+.panel-comercio[data-tema='naranja'][data-modo='claro'] {
+  --color-fondo: #f8f5f2;
+  --color-superficie: #ffffff;
+  --color-primario: #0f0f0f;
+  --color-acento: #d95f1a;
+  --color-acento-texto: #fff5ee;
+  --color-borde: #e8ddd5;
+  --color-hover: #f0ebe6;
+  --color-texto: #0f0f0f;
+  --color-texto-muted: #7a6a5a;
+  --color-sidebar-fondo: #0f0f0f;
+  --color-sidebar-borde: #1e1e1e;
+  --color-nav-activo: #1a1a1a;
+  --color-nav-texto: #666666;
+  --color-nav-texto-activo: #f0ede8;
+  --color-marca: #d95f1a;
+  --color-stat-destacado: #d95f1a;
+}
+
+.panel-comercio[data-tema='naranja'][data-modo='oscuro'] {
+  --color-fondo: #080808;
+  --color-superficie: #161616;
+  --color-primario: #0f0f0f;
+  --color-acento: #e8702a;
+  --color-acento-texto: #080808;
+  --color-borde: #242424;
+  --color-hover: #242424;
+  --color-texto: #f0ede8;
+  --color-texto-muted: #888888;
+  --color-sidebar-fondo: #080808;
+  --color-sidebar-borde: #1e1e1e;
+  --color-nav-activo: #1a1a1a;
+  --color-nav-texto: #666666;
+  --color-nav-texto-activo: #f0ede8;
+  --color-marca: #e8702a;
+  --color-stat-destacado: #e8702a;
+}

@@ -1,0 +1,41 @@
+// Paleta 3 — Negro & violeta
+
+.panel-comercio[data-tema='violeta'][data-modo='claro'] {
+  --color-fondo: #f6f5f9;
+  --color-superficie: #ffffff;
+  --color-primario: #111111;
+  --color-acento: #7c5cbf;
+  --color-acento-texto: #f0ecff;
+  --color-acento-claro: #a98ee0;
+  --color-borde: #e2dfee;
+  --color-hover: #ede9f8;
+  --color-texto: #111111;
+  --color-texto-muted: #6a6480;
+  --color-sidebar-fondo: #111111;
+  --color-sidebar-borde: #1e1c2e;
+  --color-nav-activo: #1e1c2e;
+  --color-nav-texto: #555555;
+  --color-nav-texto-activo: #eeeaf8;
+  --color-marca: #7c5cbf;
+  --color-stat-destacado: #7c5cbf;
+}
+
+.panel-comercio[data-tema='violeta'][data-modo='oscuro'] {
+  --color-fondo: #090910;
+  --color-superficie: #14131f;
+  --color-primario: #111111;
+  --color-acento: #9b7ed4;
+  --color-acento-texto: #090910;
+  --color-acento-claro: #a98ee0;
+  --color-borde: #1e1c2e;
+  --color-hover: #3d3660;
+  --color-texto: #eeeaf8;
+  --color-texto-muted: #7870a0;
+  --color-sidebar-fondo: #090910;
+  --color-sidebar-borde: #1e1c2e;
+  --color-nav-activo: #1e1c2e;
+  --color-nav-texto: #555555;
+  --color-nav-texto-activo: #eeeaf8;
+  --color-marca: #9b7ed4;
+  --color-stat-destacado: #9b7ed4;
+}

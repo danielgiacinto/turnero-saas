@@ -1,0 +1,56 @@
+<h1 class="h5 mb-3">Iniciar sesión</h1>
+
+<form [formGroup]="formulario" (ngSubmit)="ingresar()" novalidate>
+  <div class="mb-3">
+    <label class="form-label small" for="login-email">Email</label>
+    <input
+      id="login-email"
+      type="email"
+      formControlName="email"
+      class="form-control"
+      [class.is-invalid]="esInvalido('email')"
+      autocomplete="email"
+    />
+    @if (esInvalido('email')) {
+      <div class="invalid-feedback d-block">{{ mensaje('email', 'El email') }}</div>
+    }
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label small" for="login-password">Contraseña</label>
+    <input
+      id="login-password"
+      type="password"
+      formControlName="password"
+      class="form-control"
+      [class.is-invalid]="esInvalido('password')"
+      autocomplete="current-password"
+    />
+    @if (esInvalido('password')) {
+      <div class="invalid-feedback d-block">{{ mensaje('password', 'La contraseña') }}</div>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger py-2 small">{{ error() }}</div>
+  }
+
+  <button type="submit" class="btn btn-success w-100" [disabled]="cargando()">
+    {{ cargando() ? 'Ingresando…' : 'Ingresar' }}
+  </button>
+</form>
+
+<div class="text-center my-3 small text-secondary">o</div>
+
+@if (googleConfigurado) {
+  <div #botonGoogle class="d-flex justify-content-center"></div>
+} @else {
+  <div class="alert alert-secondary py-2 small mb-0">
+    Login con Google no configurado (definí <code>GOOGLE_CLIENT_ID</code>).
+  </div>
+}
+
+<hr class="my-3" />
+<p class="small mb-0 text-center">
+  ¿No tenés cuenta? <a routerLink="/auth/registro">Registrá tu comercio</a>
+</p>

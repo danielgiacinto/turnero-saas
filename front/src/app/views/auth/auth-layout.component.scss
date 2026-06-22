@@ -1,0 +1,20 @@
+// Solo colores/branding; el layout (flex, alturas, padding) va con utilidades Bootstrap
+
+.auth-fondo {
+  background-color: #0a0a0a;
+}
+
+.auth-tarjeta {
+  max-width: 420px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 1.75rem 1.5rem;
+  color: #f0f0f0;
+}
+
+.auth-marca {
+  color: #c8f135;
+  font-weight: 600;
+  font-size: 1.25rem;
+}

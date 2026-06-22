@@ -48,6 +48,7 @@ enum PropositoVerificacion {
   registro_cliente
   acceso_portal
   reenvio_identidad
+  registro_staff
 }
 
 enum CanalVerificacion {
@@ -137,19 +138,22 @@ model Usuario {
   password              String?
   google_id             String?    @unique
   telefono              String?
-  rol                   RolUsuario
-  matricula_profesional String?
-  biografia             String?
-  porcentaje_comision   Decimal    @default(0) @db.Decimal(10, 2)
-  activo                Boolean    @default(true)
+  rol                    RolUsuario
+  matricula_profesional  String?
+  biografia              String?
+  porcentaje_comision    Decimal    @default(0) @db.Decimal(10, 2)
+  activo                 Boolean    @default(true)
+  email_verificado       Boolean    @default(false)
+  email_verificado_fecha DateTime?
 
-  comercio       Comercio?    @relation(fields: [comercio_id], references: [id])
+  comercio       Comercio?      @relation(fields: [comercio_id], references: [id])
   horarios       Horario[]
   turnos         Turno[]
-  turnos_creados Turno[]      @relation("TurnosCreadosPorStaff")
+  turnos_creados Turno[]        @relation("TurnosCreadosPorStaff")
   fichas         Ficha[]
   movimientos    Movimiento[]
   invitaciones   Invitacion[]
+  verificaciones Verificacion[]
 
   @@map("usuarios")
 }
@@ -295,6 +299,7 @@ model Verificacion {
   id           String                @id @default(uuid()) @db.Uuid
   cliente_id   String?               @db.Uuid
   turno_id     String?               @db.Uuid
+  usuario_id   String?               @db.Uuid
   email        String?
   telefono     String?
   codigo_hash  String
@@ -308,6 +313,7 @@ model Verificacion {
 
   cliente Cliente? @relation(fields: [cliente_id], references: [id])
   turno   Turno?   @relation(fields: [turno_id], references: [id])
+  usuario Usuario? @relation(fields: [usuario_id], references: [id])
 
   @@map("verificaciones")
 }

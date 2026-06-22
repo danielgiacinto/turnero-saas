@@ -1,0 +1,167 @@
+// Layout y componentes base del panel admin (usa variables de tema)
+
+.panel-comercio {
+  min-height: 100vh;
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.panel-comercio__layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.panel-comercio__sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background-color: var(--color-sidebar-fondo);
+  border-right: 1px solid var(--color-sidebar-borde);
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+// En mobile/tablet el sidebar se comporta como drawer deslizable (Bootstrap lg = 992px)
+@media (max-width: 991.98px) {
+  .panel-comercio__sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1045;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .panel-comercio__sidebar--abierto {
+    transform: translateX(0);
+  }
+}
+
+.panel-comercio__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.panel-comercio__marca {
+  color: var(--color-marca);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.panel-comercio__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  color: var(--color-nav-texto);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background-color: var(--color-hover);
+    color: var(--color-nav-texto-activo);
+  }
+
+  &--activo {
+    background-color: var(--color-nav-activo);
+    color: var(--color-nav-texto-activo);
+  }
+}
+
+.panel-comercio__contenido {
+  flex: 1;
+  padding: 1.25rem;
+  overflow: auto;
+}
+
+.panel-comercio__tarjeta {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+.panel-comercio__stat {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  text-align: center;
+
+  &-numero {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-stat-destacado);
+  }
+
+  &-etiqueta {
+    font-size: 0.6875rem;
+    margin: 0.25rem 0 0;
+    color: var(--color-texto-muted);
+  }
+}
+
+.panel-comercio__toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.panel-comercio__select-tema {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8125rem;
+}
+
+// Bootstrap dentro del panel
+.panel-comercio {
+  .btn-accento {
+    background-color: var(--color-acento);
+    border-color: var(--color-acento);
+    color: var(--color-acento-texto);
+    font-weight: 500;
+
+    &:hover {
+      filter: brightness(1.05);
+      color: var(--color-acento-texto);
+    }
+  }
+
+  .btn-primario-panel {
+    background-color: var(--color-primario);
+    border-color: var(--color-primario);
+    color: var(--color-acento);
+    font-weight: 500;
+
+    &:hover {
+      filter: brightness(1.15);
+      color: var(--color-acento);
+    }
+  }
+
+  .card {
+    background-color: var(--color-superficie);
+    border-color: var(--color-borde);
+    color: var(--color-texto);
+  }
+
+  .text-muted {
+    color: var(--color-texto-muted) !important;
+  }
+}

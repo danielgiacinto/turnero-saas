@@ -1,0 +1,63 @@
+<h1 class="h5 mb-3">Sumarte al equipo</h1>
+
+@if (cargandoInvitacion()) {
+  <p class="small text-secondary">Verificando invitación…</p>
+} @else if (errorInvitacion()) {
+  <div class="alert alert-danger py-2 small mb-0">{{ errorInvitacion() }}</div>
+} @else if (invitacion(); as inv) {
+  <p class="small text-secondary mb-3">
+    Te invitaron a <strong>{{ inv.comercio.nombre }}</strong> como profesional.<br />
+    Email: <strong>{{ inv.email }}</strong>
+  </p>
+
+  <form [formGroup]="formulario" (ngSubmit)="completar()" novalidate>
+    <div class="mb-2">
+      <label class="form-label small" for="inv-nombre">Nombre y apellido</label>
+      <input
+        id="inv-nombre"
+        type="text"
+        formControlName="nombre"
+        class="form-control"
+        [class.is-invalid]="esInvalido('nombre')"
+      />
+      @if (esInvalido('nombre')) {
+        <div class="invalid-feedback d-block">{{ mensaje('nombre', 'El nombre') }}</div>
+      }
+    </div>
+
+    <div class="mb-2">
+      <label class="form-label small" for="inv-password">Contraseña</label>
+      <input
+        id="inv-password"
+        type="password"
+        formControlName="password"
+        class="form-control"
+        [class.is-invalid]="esInvalido('password')"
+        autocomplete="new-password"
+      />
+      @if (esInvalido('password')) {
+        <div class="invalid-feedback d-block">{{ mensaje('password', 'La contraseña') }}</div>
+      } @else {
+        <div class="form-text">Opcional si vas a ingresar solo con Google (mínimo 8 caracteres si la definís).</div>
+      }
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label small" for="inv-telefono">Teléfono (opcional)</label>
+      <input id="inv-telefono" type="tel" formControlName="telefono" class="form-control" />
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-danger py-2 small">{{ error() }}</div>
+    }
+
+    <button type="submit" class="btn btn-success w-100" [disabled]="cargando()">
+      {{ cargando() ? 'Creando cuenta…' : 'Crear mi cuenta' }}
+    </button>
+  </form>
+
+  @if (googleConfigurado) {
+    <div class="text-center my-3 small text-secondary">o registrate con Google</div>
+    <div #botonGoogle class="d-flex justify-content-center"></div>
+  }
+}

@@ -1,1 +1,8 @@
-// Personalizaciones sobre Bootstrap
+// Overrides Bootstrap — portal y base
+// El panel admin usa variables CSS en .panel-comercio (ver styles/temas/)
+
+@use './variables' as *;
+
+body {
+  font-family: $font-family-base;
+}

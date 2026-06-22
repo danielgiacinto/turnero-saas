@@ -1,0 +1,39 @@
+// Paleta 1 — Negro & lima eléctrico
+
+.panel-comercio[data-tema='lima'][data-modo='claro'] {
+  --color-fondo: #f7f7f5;
+  --color-superficie: #ffffff;
+  --color-primario: #111111;
+  --color-acento: #c8f135;
+  --color-acento-texto: #1a2a00;
+  --color-borde: #e0e0dc;
+  --color-hover: #eeeeec;
+  --color-texto: #111111;
+  --color-texto-muted: #666666;
+  --color-sidebar-fondo: #111111;
+  --color-sidebar-borde: #222222;
+  --color-nav-activo: #1e1e1e;
+  --color-nav-texto: #888888;
+  --color-nav-texto-activo: #f0f0f0;
+  --color-marca: #c8f135;
+  --color-stat-destacado: #c8f135;
+}
+
+.panel-comercio[data-tema='lima'][data-modo='oscuro'] {
+  --color-fondo: #0a0a0a;
+  --color-superficie: #1a1a1a;
+  --color-primario: #111111;
+  --color-acento: #c8f135;
+  --color-acento-texto: #0a0a0a;
+  --color-borde: #2a2a2a;
+  --color-hover: #2a2a2a;
+  --color-texto: #f0f0f0;
+  --color-texto-muted: #888888;
+  --color-sidebar-fondo: #0a0a0a;
+  --color-sidebar-borde: #222222;
+  --color-nav-activo: #1e1e1e;
+  --color-nav-texto: #888888;
+  --color-nav-texto-activo: #f0f0f0;
+  --color-marca: #c8f135;
+  --color-stat-destacado: #c8f135;
+}

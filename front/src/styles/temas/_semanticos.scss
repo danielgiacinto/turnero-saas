@@ -1,0 +1,41 @@
+// Estados de turno — compartidos entre paletas (light / dark vía data-modo)
+
+.panel-comercio[data-modo='claro'] {
+  --estado-confirmado-fondo: #d1fae5;
+  --estado-confirmado-texto: #065f46;
+  --estado-pendiente-fondo: #fef3c7;
+  --estado-pendiente-texto: #92400e;
+  --estado-cancelado-fondo: #fee2e2;
+  --estado-cancelado-texto: #991b1b;
+}
+
+.panel-comercio[data-modo='oscuro'] {
+  --estado-confirmado-fondo: #052e16;
+  --estado-confirmado-texto: #6ee7b7;
+  --estado-pendiente-fondo: #3b2a00;
+  --estado-pendiente-texto: #fde68a;
+  --estado-cancelado-fondo: #450a0a;
+  --estado-cancelado-texto: #fca5a5;
+}
+
+.badge-estado--confirmado {
+  background-color: var(--estado-confirmado-fondo);
+  color: var(--estado-confirmado-texto);
+}
+
+.badge-estado--pendiente {
+  background-color: var(--estado-pendiente-fondo);
+  color: var(--estado-pendiente-texto);
+}
+
+.badge-estado--cancelado {
+  background-color: var(--estado-cancelado-fondo);
+  color: var(--estado-cancelado-texto);
+}
+
+.badge-estado {
+  border-radius: 20px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}

@@ -1,0 +1,173 @@
+<header class="mb-4">
+  <h1 class="h4 mb-1 d-flex align-items-center gap-2">
+    <i class="bi bi-gear-fill text-muted" aria-hidden="true"></i>
+    Configuración
+  </h1>
+  <p class="text-muted small mb-0">Personalizá la apariencia del panel y gestioná tu equipo.</p>
+</header>
+
+<!-- Apariencia -->
+<section class="panel-comercio__tarjeta mb-4" aria-labelledby="titulo-apariencia">
+  <h2 id="titulo-apariencia" class="h6 mb-3 d-flex align-items-center gap-2">
+    <i class="bi bi-palette-fill" aria-hidden="true"></i>
+    Apariencia
+  </h2>
+
+  <p class="small text-muted mb-3">Modo de visualización</p>
+  <div class="row g-3 mb-4">
+    @for (modo of modos; track modo.id) {
+      <div class="col-12 col-sm-6">
+        <button
+          type="button"
+          class="config-modo-card w-100 text-start"
+          [class.config-modo-card--activo]="modoActivo(modo.id)"
+          (click)="seleccionarModo(modo.id)"
+          [attr.aria-pressed]="modoActivo(modo.id)"
+        >
+          <span class="config-modo-card__icono" aria-hidden="true">
+            <i class="bi" [class]="modo.icono"></i>
+          </span>
+          <span class="config-modo-card__texto">
+            <span class="config-modo-card__titulo">{{ modo.etiqueta }}</span>
+            <span class="config-modo-card__desc">{{ modo.descripcion }}</span>
+          </span>
+          @if (modoActivo(modo.id)) {
+            <i class="bi bi-check-circle-fill config-modo-card__check" aria-hidden="true"></i>
+          }
+        </button>
+      </div>
+    }
+  </div>
+
+  <p class="small text-muted mb-3">Paleta de colores</p>
+  <div class="row g-3">
+    @for (p of paletas; track p.id) {
+      <div class="col-12 col-md-4">
+        <button
+          type="button"
+          class="config-paleta-card w-100 text-start"
+          [class.config-paleta-card--activa]="paletaActiva(p.id)"
+          (click)="seleccionarPaleta(p.id)"
+          [attr.aria-pressed]="paletaActiva(p.id)"
+        >
+          <div
+            class="config-paleta-card__preview"
+            [style.background]="p.colorFondoOscuro"
+          >
+            <span
+              class="config-paleta-card__swatch"
+              [style.background]="p.colorAcento"
+            ></span>
+            <span
+              class="config-paleta-card__barra"
+              [style.background]="p.colorAcento"
+            ></span>
+          </div>
+          <div class="config-paleta-card__cuerpo">
+            <span class="config-paleta-card__nombre">{{ p.nombre }}</span>
+            <span class="config-paleta-card__desc">{{ p.descripcion }}</span>
+          </div>
+          @if (paletaActiva(p.id)) {
+            <span class="config-paleta-card__badge">
+              <i class="bi bi-check-lg" aria-hidden="true"></i>
+              Activa
+            </span>
+          }
+        </button>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Equipo (solo admin) -->
+@if (esAdmin()) {
+  <section class="panel-comercio__tarjeta" aria-labelledby="titulo-equipo">
+    <h2 id="titulo-equipo" class="h6 mb-2 d-flex align-items-center gap-2">
+      <i class="bi bi-people-fill" aria-hidden="true"></i>
+      Equipo
+    </h2>
+    <p class="small text-muted mb-3">
+      Invitá a un profesional para que acceda al panel de tu comercio.
+    </p>
+
+    <div class="config-invitacion">
+      <div class="config-invitacion__icono" aria-hidden="true">
+        <i class="bi bi-person-plus-fill"></i>
+      </div>
+      <div class="config-invitacion__formulario flex-grow-1">
+        <form [formGroup]="formularioInvitacion" (ngSubmit)="enviarInvitacion()" novalidate>
+          <label class="form-label small" for="invitar-email">Email del profesional</label>
+          <div class="input-group mb-2">
+            <span class="input-group-text">
+              <i class="bi bi-envelope" aria-hidden="true"></i>
+            </span>
+            <input
+              id="invitar-email"
+              type="email"
+              formControlName="email"
+              class="form-control"
+              [class.is-invalid]="esInvalidoInvitacion()"
+              placeholder="profesional@ejemplo.com"
+              autocomplete="email"
+            />
+            <button
+              type="submit"
+              class="btn btn-accento"
+              [disabled]="invitacionCargando()"
+            >
+              @if (invitacionCargando()) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Enviando…
+              } @else {
+                <i class="bi bi-send me-1" aria-hidden="true"></i>
+                Invitar
+              }
+            </button>
+          </div>
+          @if (esInvalidoInvitacion()) {
+            <div class="invalid-feedback d-block mb-2">{{ mensajeInvitacion() }}</div>
+          }
+
+          @if (invitacionError()) {
+            <div class="alert alert-danger py-2 small mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>
+              <span>{{ invitacionError() }}</span>
+            </div>
+          }
+
+          @if (invitacionExito()) {
+            <div class="alert alert-success py-2 small mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+              <span>{{ invitacionExito() }}</span>
+            </div>
+          }
+
+          @if (linkInvitacion(); as link) {
+            <div class="config-invitacion__link panel-comercio__tarjeta p-2">
+              <p class="small text-muted mb-1">
+                <i class="bi bi-link-45deg" aria-hidden="true"></i>
+                Link de invitación
+              </p>
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <code class="small text-break flex-grow-1">{{ link }}</code>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-secondary"
+                  (click)="copiarLink()"
+                >
+                  @if (linkCopiado()) {
+                    <i class="bi bi-clipboard-check me-1" aria-hidden="true"></i>
+                    Copiado
+                  } @else {
+                    <i class="bi bi-clipboard me-1" aria-hidden="true"></i>
+                    Copiar
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        </form>
+      </div>
+    </div>
+  </section>
+}

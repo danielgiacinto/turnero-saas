@@ -1,0 +1,134 @@
+<h1 class="h5 mb-3">Registrá tu comercio</h1>
+
+<form [formGroup]="formulario" (ngSubmit)="registrar()" novalidate>
+  <div class="mb-2">
+    <label class="form-label small" for="reg-nombre-comercio">Nombre del comercio</label>
+    <input
+      id="reg-nombre-comercio"
+      type="text"
+      formControlName="nombreComercio"
+      class="form-control"
+      [class.is-invalid]="esInvalido('nombreComercio')"
+    />
+    @if (esInvalido('nombreComercio')) {
+      <div class="invalid-feedback d-block">{{ mensaje('nombreComercio', 'El nombre del comercio') }}</div>
+    }
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label small" for="reg-url">URL pública</label>
+    <input
+      id="reg-url"
+      type="text"
+      formControlName="url"
+      class="form-control"
+      [class.is-invalid]="esInvalido('url')"
+      placeholder="mi-comercio"
+    />
+    @if (esInvalido('url')) {
+      <div class="invalid-feedback d-block">{{ mensaje('url', 'La URL') }}</div>
+    }
+  </div>
+
+  <div class="row g-2">
+    <div class="col-12 col-sm-6 mb-2">
+      <label class="form-label small" for="reg-barrio">Barrio</label>
+      <input
+        id="reg-barrio"
+        type="text"
+        formControlName="barrio"
+        class="form-control"
+        [class.is-invalid]="esInvalido('barrio')"
+      />
+      @if (esInvalido('barrio')) {
+        <div class="invalid-feedback d-block">{{ mensaje('barrio', 'El barrio') }}</div>
+      }
+    </div>
+    <div class="col-12 col-sm-6 mb-2">
+      <label class="form-label small" for="reg-rubro">Rubro</label>
+      <select
+        id="reg-rubro"
+        formControlName="rubro"
+        class="form-select"
+        [class.is-invalid]="esInvalido('rubro')"
+      >
+        @for (r of rubros; track r.valor) {
+          <option [value]="r.valor">{{ r.etiqueta }}</option>
+        }
+      </select>
+      @if (esInvalido('rubro')) {
+        <div class="invalid-feedback d-block">{{ mensaje('rubro', 'El rubro') }}</div>
+      }
+    </div>
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label small" for="reg-direccion">Dirección (opcional)</label>
+    <input id="reg-direccion" type="text" formControlName="direccion" class="form-control" />
+  </div>
+
+  <hr class="my-3" />
+  <p class="small text-secondary mb-2">Datos del dueño (administrador)</p>
+
+  <div class="mb-2">
+    <label class="form-label small" for="reg-nombre-admin">Nombre y apellido</label>
+    <input
+      id="reg-nombre-admin"
+      type="text"
+      formControlName="nombreAdmin"
+      class="form-control"
+      [class.is-invalid]="esInvalido('nombreAdmin')"
+    />
+    @if (esInvalido('nombreAdmin')) {
+      <div class="invalid-feedback d-block">{{ mensaje('nombreAdmin', 'El nombre') }}</div>
+    }
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label small" for="reg-email">Email</label>
+    <input
+      id="reg-email"
+      type="email"
+      formControlName="email"
+      class="form-control"
+      [class.is-invalid]="esInvalido('email')"
+      autocomplete="email"
+    />
+    @if (esInvalido('email')) {
+      <div class="invalid-feedback d-block">{{ mensaje('email', 'El email') }}</div>
+    }
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label small" for="reg-password">Contraseña</label>
+    <input
+      id="reg-password"
+      type="password"
+      formControlName="password"
+      class="form-control"
+      [class.is-invalid]="esInvalido('password')"
+      autocomplete="new-password"
+    />
+    @if (esInvalido('password')) {
+      <div class="invalid-feedback d-block">{{ mensaje('password', 'La contraseña') }}</div>
+    }
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label small" for="reg-telefono">Teléfono (opcional)</label>
+    <input id="reg-telefono" type="tel" formControlName="telefono" class="form-control" />
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger py-2 small">{{ error() }}</div>
+  }
+
+  <button type="submit" class="btn btn-success w-100" [disabled]="cargando()">
+    {{ cargando() ? 'Creando…' : 'Crear comercio' }}
+  </button>
+</form>
+
+<hr class="my-3" />
+<p class="small mb-0 text-center">
+  ¿Ya tenés cuenta? <a routerLink="/auth/login">Iniciá sesión</a>
+</p>

@@ -1,0 +1,89 @@
+<h1 class="h5 mb-2">Verificá tu correo</h1>
+<p class="small text-secondary mb-3">
+  Te enviamos un código de 6 dígitos. Ingresalo para activar tu cuenta e ingresar al panel.
+</p>
+
+@if (esDesarrollo) {
+  <div class="alert alert-info py-2 small mb-3">
+    <strong>Modo desarrollo:</strong> sin SMTP configurado el correo no se envía.
+    @if (codigoDesarrollo(); as codigo) {
+      Tu código es: <strong class="fs-5 letter-spacing-otp">{{ codigo }}</strong>
+    } @else if (!reenviando()) {
+      El código se enviará automáticamente al ingresar desde el login.
+    }
+  </div>
+}
+
+@if (reenviando()) {
+  <p class="small text-secondary mb-3">Enviando código a tu correo…</p>
+}
+
+<form [formGroup]="formulario" (ngSubmit)="verificar()" novalidate>
+  <div class="mb-3">
+    <label class="form-label small" for="verificar-email">Email</label>
+    <input
+      id="verificar-email"
+      type="email"
+      formControlName="email"
+      class="form-control"
+      [class.is-invalid]="esInvalido('email')"
+      [readonly]="emailSoloLectura()"
+      autocomplete="email"
+    />
+    @if (esInvalido('email')) {
+      <div class="invalid-feedback d-block">{{ mensaje('email', 'El email') }}</div>
+    } @else if (emailEstaEnmascarado(formulario.controls.email.value)) {
+      <div class="form-text">Ingresá tu email completo si solo ves parte enmascarada.</div>
+    }
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label small" for="verificar-codigo">Código de verificación</label>
+    <input
+      id="verificar-codigo"
+      type="text"
+      formControlName="codigo"
+      class="form-control text-center fs-5 letter-spacing-otp"
+      [class.is-invalid]="esInvalido('codigo')"
+      inputmode="numeric"
+      maxlength="6"
+      autocomplete="one-time-code"
+      placeholder="000000"
+    />
+    @if (esInvalido('codigo')) {
+      <div class="invalid-feedback d-block">{{ mensaje('codigo', 'El código') }}</div>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger py-2 small">{{ error() }}</div>
+  }
+
+  @if (exito()) {
+    <div class="alert alert-success py-2 small">{{ exito() }}</div>
+  }
+
+  <button type="submit" class="btn btn-success w-100 mb-2" [disabled]="cargando()">
+    {{ cargando() ? 'Verificando…' : 'Verificar y entrar' }}
+  </button>
+
+  <button
+    type="button"
+    class="btn btn-outline-secondary w-100"
+    [disabled]="reenviando() || segundosReenvio() > 0"
+    (click)="reenviarCodigo()"
+  >
+    @if (reenviando()) {
+      Reenviando…
+    } @else if (segundosReenvio() > 0) {
+      Reenviar código ({{ segundosReenvio() }}s)
+    } @else {
+      Reenviar código
+    }
+  </button>
+</form>
+
+<hr class="my-3" />
+<p class="small mb-0 text-center">
+  ¿Ya verificaste? <a routerLink="/auth/login">Iniciá sesión</a>
+</p>

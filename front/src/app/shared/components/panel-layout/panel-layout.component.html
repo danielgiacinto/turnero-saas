@@ -1,0 +1,86 @@
+<div #hostPanel class="panel-comercio" data-tema="lima" data-modo="oscuro">
+  <div class="panel-comercio__layout">
+    <aside
+      class="panel-comercio__sidebar"
+      [class.panel-comercio__sidebar--abierto]="menuAbierto()"
+    >
+      <div class="panel-comercio__marca">turnero</div>
+      <a
+        routerLink="/panel"
+        routerLinkActive="panel-comercio__nav-item--activo"
+        class="panel-comercio__nav-item"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="cerrarMenu()"
+      >
+        <i class="bi bi-calendar3" aria-hidden="true"></i>
+        Agenda
+      </a>
+      <a
+        routerLink="/panel/clientes"
+        routerLinkActive="panel-comercio__nav-item--activo"
+        class="panel-comercio__nav-item"
+        (click)="cerrarMenu()"
+      >
+        <i class="bi bi-people" aria-hidden="true"></i>
+        Clientes
+      </a>
+      <a
+        routerLink="/panel/servicios"
+        routerLinkActive="panel-comercio__nav-item--activo"
+        class="panel-comercio__nav-item"
+        (click)="cerrarMenu()"
+      >
+        <i class="bi bi-scissors" aria-hidden="true"></i>
+        Servicios
+      </a>
+      <a
+        routerLink="/panel/configuracion"
+        routerLinkActive="panel-comercio__nav-item--activo"
+        class="panel-comercio__nav-item"
+        (click)="cerrarMenu()"
+      >
+        <i class="bi bi-gear" aria-hidden="true"></i>
+        Configuración
+      </a>
+    </aside>
+
+    @if (menuAbierto()) {
+      <div class="panel-comercio__backdrop d-lg-none" (click)="cerrarMenu()"></div>
+    }
+
+    <main class="panel-comercio__contenido">
+      <div class="panel-comercio__toolbar">
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary d-lg-none"
+          (click)="alternarMenu()"
+          aria-label="Abrir menú"
+        >
+          ☰
+        </button>
+        @if (comercio(); as c) {
+          <span class="me-auto small text-truncate">
+            <strong>{{ c.nombre }}</strong>
+            @if (usuario(); as u) {
+              <span class="text-muted d-none d-sm-inline"> · {{ u.nombre }}</span>
+            }
+          </span>
+        }
+        <a
+          routerLink="/panel/configuracion"
+          class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+          aria-label="Configuración"
+          title="Configuración"
+        >
+          <i class="bi bi-gear" aria-hidden="true"></i>
+          <span class="d-none d-md-inline">Configuración</span>
+        </a>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cerrarSesion()">
+          <i class="bi bi-box-arrow-right me-1 d-none d-sm-inline" aria-hidden="true"></i>
+          Salir
+        </button>
+      </div>
+      <router-outlet />
+    </main>
+  </div>
+</div>
