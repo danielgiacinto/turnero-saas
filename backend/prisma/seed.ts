@@ -1,5 +1,7 @@
+import '../src/config/inicializar-zona-horaria';
 import { PrismaClient, EstadoSuscripcion, RolUsuario, TipoRubro } from '@prisma/client';
 import { hashearPassword } from '../src/utils/password.util';
+import { ahora, sumarDias } from '../src/utils/fecha.util';
 import { env } from '../src/config/env';
 
 const prisma = new PrismaClient();
@@ -18,11 +20,8 @@ async function main(): Promise<void> {
   const EMAIL_INVITADO = 'danielgiacinto@gmail.com';
   const TOKEN_INVITACION = 'invitacion-demo-token-0001';
 
-  const en30Dias = new Date();
-  en30Dias.setDate(en30Dias.getDate() + 30);
-
-  const en7Dias = new Date();
-  en7Dias.setDate(en7Dias.getDate() + 7);
+  const en30Dias = sumarDias(30);
+  const en7Dias = sumarDias(7);
 
   const comercio = await prisma.comercio.upsert({
     where: { url: URL_COMERCIO },
@@ -48,7 +47,7 @@ async function main(): Promise<void> {
       password: passwordHash,
       activo: true,
       email_verificado: true,
-      email_verificado_fecha: new Date(),
+      email_verificado_fecha: ahora(),
     },
     create: {
       comercio_id: comercio.id,
@@ -58,7 +57,7 @@ async function main(): Promise<void> {
       rol: RolUsuario.admin,
       telefono: null,
       email_verificado: true,
-      email_verificado_fecha: new Date(),
+      email_verificado_fecha: ahora(),
     },
   });
 

@@ -3,11 +3,11 @@
     <i class="bi bi-gear-fill text-muted" aria-hidden="true"></i>
     Configuración
   </h1>
-  <p class="text-muted small mb-0">Personalizá la apariencia del panel y gestioná tu equipo.</p>
+  <p class="text-muted small mb-0">Personalizá la apariencia del panel.</p>
 </header>
 
 <!-- Apariencia -->
-<section class="panel-comercio__tarjeta mb-4" aria-labelledby="titulo-apariencia">
+<section class="panel-comercio__tarjeta" aria-labelledby="titulo-apariencia">
   <h2 id="titulo-apariencia" class="h6 mb-3 d-flex align-items-center gap-2">
     <i class="bi bi-palette-fill" aria-hidden="true"></i>
     Apariencia
@@ -78,96 +78,3 @@
     }
   </div>
 </section>
-
-<!-- Equipo (solo admin) -->
-@if (esAdmin()) {
-  <section class="panel-comercio__tarjeta" aria-labelledby="titulo-equipo">
-    <h2 id="titulo-equipo" class="h6 mb-2 d-flex align-items-center gap-2">
-      <i class="bi bi-people-fill" aria-hidden="true"></i>
-      Equipo
-    </h2>
-    <p class="small text-muted mb-3">
-      Invitá a un profesional para que acceda al panel de tu comercio.
-    </p>
-
-    <div class="config-invitacion">
-      <div class="config-invitacion__icono" aria-hidden="true">
-        <i class="bi bi-person-plus-fill"></i>
-      </div>
-      <div class="config-invitacion__formulario flex-grow-1">
-        <form [formGroup]="formularioInvitacion" (ngSubmit)="enviarInvitacion()" novalidate>
-          <label class="form-label small" for="invitar-email">Email del profesional</label>
-          <div class="input-group mb-2">
-            <span class="input-group-text">
-              <i class="bi bi-envelope" aria-hidden="true"></i>
-            </span>
-            <input
-              id="invitar-email"
-              type="email"
-              formControlName="email"
-              class="form-control"
-              [class.is-invalid]="esInvalidoInvitacion()"
-              placeholder="profesional@ejemplo.com"
-              autocomplete="email"
-            />
-            <button
-              type="submit"
-              class="btn btn-accento"
-              [disabled]="invitacionCargando()"
-            >
-              @if (invitacionCargando()) {
-                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                Enviando…
-              } @else {
-                <i class="bi bi-send me-1" aria-hidden="true"></i>
-                Invitar
-              }
-            </button>
-          </div>
-          @if (esInvalidoInvitacion()) {
-            <div class="invalid-feedback d-block mb-2">{{ mensajeInvitacion() }}</div>
-          }
-
-          @if (invitacionError()) {
-            <div class="alert alert-danger py-2 small mb-2 d-flex align-items-start gap-2">
-              <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>
-              <span>{{ invitacionError() }}</span>
-            </div>
-          }
-
-          @if (invitacionExito()) {
-            <div class="alert alert-success py-2 small mb-2 d-flex align-items-start gap-2">
-              <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
-              <span>{{ invitacionExito() }}</span>
-            </div>
-          }
-
-          @if (linkInvitacion(); as link) {
-            <div class="config-invitacion__link panel-comercio__tarjeta p-2">
-              <p class="small text-muted mb-1">
-                <i class="bi bi-link-45deg" aria-hidden="true"></i>
-                Link de invitación
-              </p>
-              <div class="d-flex flex-wrap gap-2 align-items-center">
-                <code class="small text-break flex-grow-1">{{ link }}</code>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-secondary"
-                  (click)="copiarLink()"
-                >
-                  @if (linkCopiado()) {
-                    <i class="bi bi-clipboard-check me-1" aria-hidden="true"></i>
-                    Copiado
-                  } @else {
-                    <i class="bi bi-clipboard me-1" aria-hidden="true"></i>
-                    Copiar
-                  }
-                </button>
-              </div>
-            </div>
-          }
-        </form>
-      </div>
-    </div>
-  </section>
-}

@@ -33,6 +33,7 @@ export const env = {
   smtpUser: process.env.SMTP_USER ?? '',
   smtpPass: process.env.SMTP_PASS ?? '',
   emailFrom: process.env.EMAIL_FROM ?? 'Turnero <no-reply@localhost>',
+  zonaHoraria: process.env.TZ ?? 'America/Argentina/Buenos_Aires',
 };
 
 export function smtpEstaConfigurado(): boolean {

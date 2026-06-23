@@ -1,6 +1,7 @@
 import {
-  AfterViewInit,
+  afterNextRender,
   Component,
+  effect,
   ElementRef,
   inject,
   signal,
@@ -24,7 +25,7 @@ import {
   templateUrl: './aceptar-invitacion.component.html',
   styleUrl: './aceptar-invitacion.component.scss',
 })
-export class AceptarInvitacionComponent implements AfterViewInit {
+export class AceptarInvitacionComponent {
   private readonly auth = inject(AuthService);
   private readonly google = inject(GoogleIdentityService);
   private readonly router = inject(Router);
@@ -34,6 +35,7 @@ export class AceptarInvitacionComponent implements AfterViewInit {
 
   readonly googleConfigurado = this.google.estaConfigurado;
   private token = '';
+  private googleRenderizado = false;
 
   readonly invitacion = signal<InvitacionInfo | null>(null);
   readonly cargandoInvitacion = signal(true);
@@ -60,15 +62,28 @@ export class AceptarInvitacionComponent implements AfterViewInit {
         this.cargandoInvitacion.set(false);
       },
     });
+
+    effect(() => {
+      const inv = this.invitacion();
+      if (!inv || this.cargandoInvitacion() || !this.googleConfigurado) {
+        return;
+      }
+      afterNextRender(() => this.renderizarBotonGoogle());
+    });
   }
 
-  ngAfterViewInit(): void {
-    const contenedor = this.botonGoogle();
-    if (contenedor) {
-      void this.google.renderizarBoton(contenedor.nativeElement, (idToken) =>
-        this.completarConGoogle(idToken),
-      );
+  private renderizarBotonGoogle(): void {
+    if (this.googleRenderizado) {
+      return;
     }
+    const contenedor = this.botonGoogle();
+    if (!contenedor?.nativeElement) {
+      return;
+    }
+    this.googleRenderizado = true;
+    void this.google.renderizarBoton(contenedor.nativeElement, (idToken) =>
+      this.completarConGoogle(idToken),
+    );
   }
 
   esInvalido(campo: 'nombre' | 'password'): boolean {
@@ -91,20 +106,39 @@ export class AceptarInvitacionComponent implements AfterViewInit {
       return;
     }
 
+    if (!password) {
+      this.error.set(
+        this.googleConfigurado
+          ? 'Definí una contraseña (mín. 8 caracteres) o usá el botón de Google.'
+          : 'Definí una contraseña de al menos 8 caracteres.',
+      );
+      return;
+    }
+
     const { nombre, telefono } = this.formulario.getRawValue();
     this.enviar({
       nombre,
-      password: password || undefined,
+      password,
       telefono: telefono || undefined,
     });
   }
 
   private completarConGoogle(idToken: string): void {
-    const nombre =
-      this.formulario.controls.nombre.value ||
-      this.invitacion()?.email ||
-      'Profesional';
-    this.enviar({ nombre, idToken });
+    this.formularioEnviado.set(true);
+    this.error.set(null);
+
+    const nombre = this.formulario.controls.nombre.value.trim();
+    if (!nombre) {
+      this.error.set('Completá tu nombre antes de continuar con Google.');
+      return;
+    }
+
+    const telefono = this.formulario.controls.telefono.value.trim();
+    this.enviar({
+      nombre,
+      idToken,
+      telefono: telefono || undefined,
+    });
   }
 
   private enviar(dto: {

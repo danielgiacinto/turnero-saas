@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   PLATFORM_ID,
+  computed,
   effect,
   inject,
   signal,
@@ -35,6 +36,7 @@ export class PanelLayoutComponent implements AfterViewInit {
   readonly modoActual = this.temaPanel.modoActual;
   readonly usuario = this.auth.usuario;
   readonly comercio = this.auth.comercio;
+  readonly esAdmin = computed(() => this.auth.usuario()?.rol === 'admin');
   readonly menuAbierto = signal(false);
 
   constructor() {

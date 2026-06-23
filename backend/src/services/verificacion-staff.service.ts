@@ -2,6 +2,7 @@ import { CanalVerificacion, PropositoVerificacion, Usuario } from '@prisma/clien
 import { prisma } from '../config/prisma';
 import { compararPassword, hashearPassword } from '../utils/password.util';
 import { generarCodigoOtp } from '../utils/otp.util';
+import { ahora, sumarMinutos } from '../utils/fecha.util';
 import { ErrorValidacion } from '../utils/error-app';
 import { emailService } from './email.service';
 
@@ -34,7 +35,7 @@ export const verificacionStaffService = {
 
     const codigo = generarCodigoOtp(OTP_LONGITUD);
     const codigoHash = await hashearPassword(codigo);
-    const expiraFecha = new Date(Date.now() + OTP_EXPIRACION_MINUTOS * 60_000);
+    const expiraFecha = sumarMinutos(OTP_EXPIRACION_MINUTOS);
 
     await prisma.verificacion.create({
       data: {
@@ -82,7 +83,7 @@ export const verificacionStaffService = {
       throw new ErrorValidacion('No hay un código de verificación pendiente. Pedí uno nuevo.');
     }
 
-    if (verificacion.expira_fecha < new Date()) {
+    if (verificacion.expira_fecha < ahora()) {
       throw new ErrorValidacion('El código expiró. Pedí uno nuevo.');
     }
 
@@ -103,11 +104,11 @@ export const verificacionStaffService = {
     const [, usuarioActualizado] = await prisma.$transaction([
       prisma.verificacion.update({
         where: { id: verificacion.id },
-        data: { usado_fecha: new Date() },
+        data: { usado_fecha: ahora() },
       }),
       prisma.usuario.update({
         where: { id: usuario.id },
-        data: { email_verificado: true, email_verificado_fecha: new Date() },
+        data: { email_verificado: true, email_verificado_fecha: ahora() },
       }),
     ]);
 

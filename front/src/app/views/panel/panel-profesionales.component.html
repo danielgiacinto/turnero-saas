@@ -1,0 +1,196 @@
+<header class="mb-4">
+  <h1 class="h4 mb-1 d-flex align-items-center gap-2">
+    <i class="bi bi-person-badge-fill text-muted" aria-hidden="true"></i>
+    Profesionales
+  </h1>
+  <p class="text-muted small mb-0">Gestioná el equipo de tu comercio e invitá nuevos profesionales.</p>
+</header>
+
+<!-- Invitar -->
+<section class="panel-comercio__tarjeta mb-4" aria-labelledby="titulo-invitacion">
+  <h2 id="titulo-invitacion" class="h6 mb-3 d-flex align-items-center gap-2">
+    <i class="bi bi-person-plus-fill" aria-hidden="true"></i>
+    Invitar profesional
+  </h2>
+
+  <div class="prof-invitacion">
+    <div class="prof-invitacion__icono" aria-hidden="true">
+      <i class="bi bi-envelope-plus-fill"></i>
+    </div>
+    <div class="flex-grow-1">
+      <form [formGroup]="formularioInvitacion" (ngSubmit)="enviarInvitacion()" novalidate>
+        <label class="form-label small" for="invitar-email">Email del profesional</label>
+        <div class="input-group mb-2">
+          <span class="input-group-text">
+            <i class="bi bi-envelope" aria-hidden="true"></i>
+          </span>
+          <input
+            id="invitar-email"
+            type="email"
+            formControlName="email"
+            class="form-control"
+            [class.is-invalid]="esInvalidoInvitacion()"
+            placeholder="profesional@ejemplo.com"
+            autocomplete="email"
+          />
+          <button type="submit" class="btn btn-accento" [disabled]="invitacionCargando()">
+            @if (invitacionCargando()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              Enviando…
+            } @else {
+              <i class="bi bi-send me-1" aria-hidden="true"></i>
+              Invitar
+            }
+          </button>
+        </div>
+        @if (esInvalidoInvitacion()) {
+          <div class="invalid-feedback d-block mb-2">{{ mensajeInvitacion() }}</div>
+        }
+
+        @if (invitacionError()) {
+          <div class="alert alert-danger py-2 small mb-2 d-flex align-items-start gap-2">
+            <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>
+            <span>{{ invitacionError() }}</span>
+          </div>
+        }
+
+        @if (invitacionExito()) {
+          <div class="alert alert-success py-2 small mb-2 d-flex align-items-start gap-2">
+            <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+            <span>{{ invitacionExito() }}</span>
+          </div>
+        }
+
+        @if (linkInvitacion(); as link) {
+          <div class="prof-invitacion__link panel-comercio__tarjeta p-2">
+            <p class="small text-muted mb-1">
+              <i class="bi bi-link-45deg" aria-hidden="true"></i>
+              Link de invitación
+            </p>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <code class="small text-break flex-grow-1">{{ link }}</code>
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="copiarLink()">
+                @if (linkCopiado()) {
+                  <i class="bi bi-clipboard-check me-1" aria-hidden="true"></i>
+                  Copiado
+                } @else {
+                  <i class="bi bi-clipboard me-1" aria-hidden="true"></i>
+                  Copiar
+                }
+              </button>
+            </div>
+          </div>
+        }
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Listado -->
+<section class="panel-comercio__tarjeta" aria-labelledby="titulo-listado">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h2 id="titulo-listado" class="h6 mb-0 d-flex align-items-center gap-2">
+      <i class="bi bi-table" aria-hidden="true"></i>
+      Equipo activo
+    </h2>
+    <button
+      type="button"
+      class="btn btn-sm btn-outline-secondary"
+      [disabled]="cargandoListado()"
+      (click)="cargarListado()"
+    >
+      <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>
+      Actualizar
+    </button>
+  </div>
+
+  @if (cargandoListado()) {
+    <p class="small text-muted mb-0">
+      <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      Cargando profesionales…
+    </p>
+  } @else if (errorListado()) {
+    <div class="alert alert-danger py-2 small mb-0">{{ errorListado() }}</div>
+  } @else if (profesionales().length === 0) {
+    <p class="small text-muted mb-0">
+      <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+      Todavía no hay profesionales en tu comercio. Enviá una invitación para sumar al primero.
+    </p>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 prof-tabla">
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Email</th>
+            <th scope="col" class="d-none d-md-table-cell">Teléfono</th>
+            <th scope="col" class="d-none d-lg-table-cell">Matrícula</th>
+            <th scope="col">Cuenta</th>
+            <th scope="col">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of profesionales(); track p.id) {
+            <tr>
+              <td class="fw-medium">{{ p.nombre }}</td>
+              <td>{{ p.email }}</td>
+              <td class="d-none d-md-table-cell text-muted">{{ p.telefono ?? '—' }}</td>
+              <td class="d-none d-lg-table-cell text-muted">{{ p.matricula_profesional ?? '—' }}</td>
+              <td>
+                @if (p.email_verificado) {
+                  <span class="badge-estado badge-estado--confirmado">
+                    <i class="bi bi-patch-check me-1" aria-hidden="true"></i>
+                    Verificada
+                  </span>
+                } @else {
+                  <span class="badge-estado badge-estado--pendiente">Pendiente</span>
+                }
+              </td>
+              <td>
+                @if (p.activo) {
+                  <span class="badge-estado badge-estado--confirmado">Activo</span>
+                } @else {
+                  <span class="badge-estado badge-estado--cancelado">Inactivo</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (!cargandoListado() && invitacionesPendientes().length > 0) {
+  <section class="panel-comercio__tarjeta mt-4" aria-labelledby="titulo-invitaciones">
+    <h2 id="titulo-invitaciones" class="h6 mb-3 d-flex align-items-center gap-2">
+      <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+      Invitaciones pendientes
+    </h2>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 prof-tabla">
+        <thead>
+          <tr>
+            <th scope="col">Email</th>
+            <th scope="col">Vence</th>
+            <th scope="col">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inv of invitacionesPendientes(); track inv.id) {
+            <tr>
+              <td>{{ inv.email }}</td>
+              <td class="text-muted">{{ inv.expiration | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <span class="badge-estado badge-estado--pendiente">
+                  <i class="bi bi-envelope-open me-1" aria-hidden="true"></i>
+                  Esperando aceptación
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

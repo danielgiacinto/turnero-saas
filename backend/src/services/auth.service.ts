@@ -5,6 +5,7 @@ import { prisma } from '../config/prisma';
 import { env } from '../config/env';
 import { compararPassword, hashearPassword } from '../utils/password.util';
 import { generarJwt } from '../utils/jwt.util';
+import { ahora, sumarDias } from '../utils/fecha.util';
 import {
   ErrorEmailNoVerificado,
   ErrorNoAutorizado,
@@ -18,6 +19,7 @@ import {
   LoginCredencialesDto,
   LoginGoogleDto,
   ReenviarCodigoDto,
+  DisponibilidadComercioDto,
   RegistroComercioDto,
   VerificarEmailDto,
 } from '../dtos/auth.dto';
@@ -102,7 +104,7 @@ function enmascararEmail(email: string): string {
 function datosEmailVerificado(): { email_verificado: true; email_verificado_fecha: Date } {
   return {
     email_verificado: true,
-    email_verificado_fecha: new Date(),
+    email_verificado_fecha: ahora(),
   };
 }
 
@@ -124,15 +126,56 @@ async function verificarTokenGoogle(idToken: string): Promise<{ email: string; g
   return { email: normalizarEmail(payload.email), googleId: payload.sub };
 }
 
+async function assertUrlComercioDisponible(url: string): Promise<void> {
+  const urlExistente = await prisma.comercio.findUnique({ where: { url } });
+  if (urlExistente) {
+    throw new ErrorValidacion('La URL del comercio ya está en uso.');
+  }
+}
+
+async function assertNombreComercioDisponible(nombre: string): Promise<void> {
+  const nombreExistente = await prisma.comercio.findFirst({
+    where: { nombre: { equals: nombre.trim(), mode: 'insensitive' } },
+  });
+  if (nombreExistente) {
+    throw new ErrorValidacion('Ya existe un comercio registrado con ese nombre.');
+  }
+}
+
 export const authService = {
+  async verificarDisponibilidadComercio(params: {
+    url?: string;
+    nombre?: string;
+  }): Promise<DisponibilidadComercioDto> {
+    const resultado: DisponibilidadComercioDto = {
+      url_disponible: true,
+      nombre_disponible: true,
+    };
+
+    const url = params.url?.trim().toLowerCase();
+    if (url) {
+      const urlExistente = await prisma.comercio.findUnique({ where: { url } });
+      resultado.url_disponible = !urlExistente;
+    }
+
+    const nombre = params.nombre?.trim();
+    if (nombre) {
+      const nombreExistente = await prisma.comercio.findFirst({
+        where: { nombre: { equals: nombre, mode: 'insensitive' } },
+      });
+      resultado.nombre_disponible = !nombreExistente;
+    }
+
+    return resultado;
+  },
+
   async registrarComercioConAdmin(dto: RegistroComercioDto): Promise<ResultadoRegistroPendiente> {
     const email = normalizarEmail(dto.email);
     const url = dto.url.trim().toLowerCase();
+    const nombreComercio = dto.nombreComercio.trim();
 
-    const urlExistente = await prisma.comercio.findUnique({ where: { url } });
-    if (urlExistente) {
-      throw new ErrorValidacion('La URL del comercio ya está en uso.');
-    }
+    await assertUrlComercioDisponible(url);
+    await assertNombreComercioDisponible(nombreComercio);
 
     const emailExistente = await prisma.usuario.findUnique({ where: { email } });
     if (emailExistente) {
@@ -140,18 +183,17 @@ export const authService = {
     }
 
     const passwordHash = await hashearPassword(dto.password);
-    const fechaVencimiento = new Date();
-    fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
+    const fechaVencimiento = sumarDias(30);
 
     const admin = await prisma.$transaction(async (tx) => {
       const comercio = await tx.comercio.create({
         data: {
-          nombre: dto.nombreComercio,
+          nombre: nombreComercio,
           url,
           estado_suscripcion: 'pendiente',
-          barrio: dto.barrio,
+          barrio: dto.barrio.trim(),
           rubro: dto.rubro,
-          direccion: dto.direccion ?? null,
+          direccion: dto.direccion.trim(),
           fecha_vencimiento: fechaVencimiento,
         },
       });
@@ -159,11 +201,11 @@ export const authService = {
       return tx.usuario.create({
         data: {
           comercio_id: comercio.id,
-          nombre: dto.nombreAdmin,
+          nombre: dto.nombreAdmin.trim(),
           email,
           password: passwordHash,
           rol: RolUsuario.admin,
-          telefono: dto.telefono ?? null,
+          telefono: dto.telefono.trim(),
         },
       });
     });
@@ -299,6 +341,46 @@ export const authService = {
     };
   },
 
+  async listarProfesionales(comercioId: string): Promise<{
+    profesionales: {
+      id: string;
+      nombre: string;
+      email: string;
+      telefono: string | null;
+      activo: boolean;
+      email_verificado: boolean;
+      matricula_profesional: string | null;
+    }[];
+    invitaciones_pendientes: { id: string; email: string; expiration: Date }[];
+  }> {
+    const [profesionales, invitaciones_pendientes] = await Promise.all([
+      prisma.usuario.findMany({
+        where: { comercio_id: comercioId, rol: RolUsuario.profesional },
+        orderBy: { nombre: 'asc' },
+        select: {
+          id: true,
+          nombre: true,
+          email: true,
+          telefono: true,
+          activo: true,
+          email_verificado: true,
+          matricula_profesional: true,
+        },
+      }),
+      prisma.invitacion.findMany({
+        where: {
+          comercio_id: comercioId,
+          estado: EstadoInvitacion.pendiente,
+          expiration: { gt: ahora() },
+        },
+        orderBy: { created_at: 'desc' },
+        select: { id: true, email: true, expiration: true },
+      }),
+    ]);
+
+    return { profesionales, invitaciones_pendientes };
+  },
+
   async crearInvitacion(
     comercioId: string,
     dto: InvitarStaffDto,
@@ -318,8 +400,7 @@ export const authService = {
     }
 
     const token = randomBytes(32).toString('hex');
-    const expiration = new Date();
-    expiration.setDate(expiration.getDate() + 7);
+    const expiration = sumarDias(7);
 
     await prisma.invitacion.create({
       data: { comercio_id: comercioId, email, token, expiration },
@@ -342,7 +423,7 @@ export const authService = {
       throw new ErrorNoEncontrado('La invitación no existe o ya fue utilizada.');
     }
 
-    if (invitacion.estado === EstadoInvitacion.expirada || invitacion.expiration < new Date()) {
+    if (invitacion.estado === EstadoInvitacion.expirada || invitacion.expiration < ahora()) {
       if (invitacion.estado !== EstadoInvitacion.expirada) {
         await prisma.invitacion.update({
           where: { id: invitacion.id },
@@ -368,7 +449,7 @@ export const authService = {
       throw new ErrorValidacion('La invitación no es válida o ya fue utilizada.');
     }
 
-    if (invitacion.expiration < new Date()) {
+    if (invitacion.expiration < ahora()) {
       await prisma.invitacion.update({
         where: { id: invitacion.id },
         data: { estado: EstadoInvitacion.expirada },

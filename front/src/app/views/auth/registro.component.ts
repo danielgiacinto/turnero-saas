@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import {
   controlInvalido,
+  crearValidadorDisponibilidadComercio,
   mensajeValidacion,
 } from '../../shared/utils/validacion-formulario.util';
 
@@ -22,9 +23,11 @@ type CampoRegistro =
   | 'url'
   | 'barrio'
   | 'rubro'
+  | 'direccion'
   | 'nombreAdmin'
   | 'email'
-  | 'password';
+  | 'password'
+  | 'telefono';
 
 @Component({
   selector: 'app-registro',
@@ -43,24 +46,65 @@ export class RegistroComponent {
   readonly formularioEnviado = signal(false);
 
   readonly formulario = this.fb.nonNullable.group({
-    nombreComercio: ['', Validators.required],
-    url: ['', [Validators.required, Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)]],
+    nombreComercio: [
+      '',
+      Validators.required,
+      [],
+      [
+        crearValidadorDisponibilidadComercio(
+          (url, nombre) => this.auth.verificarDisponibilidadComercio(url, nombre),
+          'nombre',
+        ),
+      ],
+    ],
+    url: [
+      '',
+      [Validators.required, Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)],
+      [
+        crearValidadorDisponibilidadComercio(
+          (url, nombre) => this.auth.verificarDisponibilidadComercio(url, nombre),
+          'url',
+        ),
+      ],
+    ],
     barrio: ['', Validators.required],
     rubro: ['barberia', Validators.required],
-    direccion: [''],
+    direccion: ['', Validators.required],
     nombreAdmin: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
-    telefono: [''],
+    telefono: ['', Validators.required],
   });
 
   esInvalido(campo: CampoRegistro): boolean {
-    return controlInvalido(this.formulario.get(campo), this.formularioEnviado());
+    const control = this.formulario.get(campo);
+    const mostrar = this.formularioEnviado() || (control?.dirty ?? false);
+    return controlInvalido(control, mostrar);
+  }
+
+  estaVerificando(campo: 'nombreComercio' | 'url'): boolean {
+    const control = this.formulario.get(campo);
+    return (control?.pending ?? false) && (control?.dirty ?? false);
+  }
+
+  urlEstaDisponible(): boolean {
+    const control = this.formulario.get('url');
+    if (!control?.dirty || control.pending) {
+      return false;
+    }
+    const valor = String(control.value ?? '').trim();
+    if (!valor || control.hasError('required') || control.hasError('pattern')) {
+      return false;
+    }
+    return control.valid;
   }
 
   mensaje(campo: CampoRegistro, etiqueta: string): string {
     const control = this.formulario.get(campo);
-    if (control?.errors?.['pattern']) {
+    if (control?.errors?.['noDisponible'] && campo === 'url') {
+      return 'Ya existe esta dirección. Ingresá otra, por favor.';
+    }
+    if (control?.errors?.['pattern'] && campo === 'url') {
       return 'La URL solo puede tener letras minúsculas, números y guiones.';
     }
     return mensajeValidacion(control, etiqueta);
@@ -70,7 +114,7 @@ export class RegistroComponent {
     this.formularioEnviado.set(true);
     this.error.set(null);
 
-    if (this.formulario.invalid) {
+    if (this.formulario.invalid || this.formulario.pending) {
       return;
     }
 

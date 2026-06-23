@@ -8,6 +8,8 @@ import {
   CompletarInvitacion,
   ComercioSesion,
   InvitacionInfo,
+  ListadoProfesionales,
+  DisponibilidadComercio,
   RegistroComercio,
   ResultadoAutenticacion,
   ResultadoRegistroPendiente,
@@ -78,6 +80,24 @@ export class AuthService {
       .pipe(map((res) => res.datos));
   }
 
+  verificarDisponibilidadComercio(
+    url?: string,
+    nombre?: string,
+  ): Observable<DisponibilidadComercio> {
+    const params: Record<string, string> = {};
+    if (url) {
+      params['url'] = url;
+    }
+    if (nombre) {
+      params['nombre'] = nombre;
+    }
+    return this.http
+      .get<RespuestaApi<DisponibilidadComercio>>(`${this.baseUrl}/disponibilidad-comercio`, {
+        params,
+      })
+      .pipe(map((res) => res.datos));
+  }
+
   verificarEmail(email: string, codigo: string): Observable<ResultadoAutenticacion> {
     return this.http
       .post<RespuestaApi<ResultadoAutenticacion>>(`${this.baseUrl}/verificar-email`, { email, codigo })
@@ -139,6 +159,12 @@ export class AuthService {
   invitar(email: string): Observable<{ email: string; link: string }> {
     return this.http
       .post<RespuestaApi<{ email: string; link: string }>>(`${this.baseUrl}/invitar`, { email })
+      .pipe(map((res) => res.datos));
+  }
+
+  listarProfesionales(): Observable<ListadoProfesionales> {
+    return this.http
+      .get<RespuestaApi<ListadoProfesionales>>(`${this.baseUrl}/profesionales`)
       .pipe(map((res) => res.datos));
   }
 

@@ -1,3 +1,35 @@
 :host {
   display: block;
 }
+
+.campo-url {
+  &--disponible .form-control.is-valid {
+    border-color: var(--bs-success);
+  }
+
+  &--disponible .form-control.is-valid:focus {
+    border-color: var(--bs-success);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-success-rgb), 0.25);
+  }
+
+  &__icono {
+    background-color: transparent;
+    border-color: var(--bs-success);
+    color: var(--bs-success);
+  }
+
+  &__estado {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+  }
+
+  &__estado--disponible {
+    color: var(--bs-success);
+  }
+
+  &__estado--verificando {
+    color: var(--bs-secondary);
+  }
+}

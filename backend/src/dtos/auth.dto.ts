@@ -5,11 +5,16 @@ export interface RegistroComercioDto {
   url: string;
   barrio: string;
   rubro: TipoRubro;
-  direccion?: string;
+  direccion: string;
   nombreAdmin: string;
   email: string;
   password: string;
-  telefono?: string;
+  telefono: string;
+}
+
+export interface DisponibilidadComercioDto {
+  url_disponible: boolean;
+  nombre_disponible: boolean;
 }
 
 export interface LoginCredencialesDto {

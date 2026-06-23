@@ -37,8 +37,10 @@
       />
       @if (esInvalido('password')) {
         <div class="invalid-feedback d-block">{{ mensaje('password', 'La contraseña') }}</div>
+      } @else if (googleConfigurado) {
+        <div class="form-text">Opcional si vas a crear la cuenta con Google (mín. 8 caracteres si la definís).</div>
       } @else {
-        <div class="form-text">Opcional si vas a ingresar solo con Google (mínimo 8 caracteres si la definís).</div>
+        <div class="form-text">Mínimo 8 caracteres.</div>
       }
     </div>
 
@@ -52,12 +54,15 @@
     }
 
     <button type="submit" class="btn btn-success w-100" [disabled]="cargando()">
-      {{ cargando() ? 'Creando cuenta…' : 'Crear mi cuenta' }}
+      {{ cargando() ? 'Creando cuenta…' : 'Crear cuenta con contraseña' }}
     </button>
   </form>
 
   @if (googleConfigurado) {
-    <div class="text-center my-3 small text-secondary">o registrate con Google</div>
+    <div class="text-center my-3 small text-secondary">o creá tu cuenta con Google</div>
     <div #botonGoogle class="d-flex justify-content-center"></div>
+    <p class="form-text text-center small mb-0 mt-2">
+      Usá la cuenta de Google asociada a <strong>{{ inv.email }}</strong>.
+    </p>
   }
 }

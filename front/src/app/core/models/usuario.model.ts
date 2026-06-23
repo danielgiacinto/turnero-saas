@@ -43,11 +43,16 @@ export interface RegistroComercio {
   url: string;
   barrio: string;
   rubro: string;
-  direccion?: string;
+  direccion: string;
   nombreAdmin: string;
   email: string;
   password: string;
-  telefono?: string;
+  telefono: string;
+}
+
+export interface DisponibilidadComercio {
+  url_disponible: boolean;
+  nombre_disponible: boolean;
 }
 
 export interface InvitacionInfo {
@@ -60,4 +65,25 @@ export interface CompletarInvitacion {
   password?: string;
   idToken?: string;
   telefono?: string;
+}
+
+export interface ProfesionalListado {
+  id: string;
+  nombre: string;
+  email: string;
+  telefono: string | null;
+  activo: boolean;
+  email_verificado: boolean;
+  matricula_profesional: string | null;
+}
+
+export interface InvitacionPendienteListado {
+  id: string;
+  email: string;
+  expiration: string;
+}
+
+export interface ListadoProfesionales {
+  profesionales: ProfesionalListado[];
+  invitaciones_pendientes: InvitacionPendienteListado[];
 }

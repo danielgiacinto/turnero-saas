@@ -1,5 +1,7 @@
+import './config/inicializar-zona-horaria';
 import { crearApp } from './app';
 import { env } from './config/env';
+import { ZONA_HORARIA } from './config/inicializar-zona-horaria';
 import { prisma } from './config/prisma';
 
 const app = crearApp();
@@ -17,7 +19,7 @@ async function iniciarServidor(): Promise<void> {
 
   try {
     await prisma.$connect();
-    console.log('Conexión a PostgreSQL establecida.');
+    console.log(`Conexión a PostgreSQL establecida (zona horaria: ${ZONA_HORARIA}).`);
   } catch (error) {
     console.warn('No se pudo conectar a PostgreSQL. El endpoint /api/salud sigue disponible.');
     console.warn(error);

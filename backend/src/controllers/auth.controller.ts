@@ -14,6 +14,22 @@ function requerirCampos(origen: Record<string, unknown>, campos: string[]): void
 }
 
 export const authController = {
+  async disponibilidadComercio(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const url = typeof req.query.url === 'string' ? req.query.url : undefined;
+      const nombre = typeof req.query.nombre === 'string' ? req.query.nombre : undefined;
+
+      if (!url?.trim() && !nombre?.trim()) {
+        throw new ErrorValidacion('Indicá url y/o nombre para verificar disponibilidad.');
+      }
+
+      const resultado = await authService.verificarDisponibilidadComercio({ url, nombre });
+      respuestaExito(res, resultado);
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async registro(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       requerirCampos(req.body, [
@@ -21,9 +37,11 @@ export const authController = {
         'url',
         'barrio',
         'rubro',
+        'direccion',
         'nombreAdmin',
         'email',
         'password',
+        'telefono',
       ]);
       const resultado = await authService.registrarComercioConAdmin(req.body);
       respuestaExito(res, resultado, 201);
@@ -79,6 +97,18 @@ export const authController = {
       }
       const sesion = await authService.obtenerSesion(req.usuario.sub);
       respuestaExito(res, sesion);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async listarProfesionales(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.usuario?.comercio_id) {
+        throw new ErrorNoAutorizado('El usuario no está asociado a un comercio.');
+      }
+      const resultado = await authService.listarProfesionales(req.usuario.comercio_id);
+      respuestaExito(res, resultado);
     } catch (error) {
       next(error);
     }

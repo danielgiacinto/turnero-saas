@@ -12,22 +12,49 @@
     />
     @if (esInvalido('nombreComercio')) {
       <div class="invalid-feedback d-block">{{ mensaje('nombreComercio', 'El nombre del comercio') }}</div>
+    } @else if (estaVerificando('nombreComercio')) {
+      <div class="form-text">Verificando disponibilidad del nombre…</div>
     }
   </div>
 
   <div class="mb-2">
     <label class="form-label small" for="reg-url">URL pública</label>
-    <input
-      id="reg-url"
-      type="text"
-      formControlName="url"
-      class="form-control"
-      [class.is-invalid]="esInvalido('url')"
-      placeholder="mi-comercio"
-    />
-    @if (esInvalido('url')) {
-      <div class="invalid-feedback d-block">{{ mensaje('url', 'La URL') }}</div>
-    }
+    <div class="input-group campo-url" [class.campo-url--disponible]="urlEstaDisponible()">
+      <input
+        id="reg-url"
+        type="text"
+        formControlName="url"
+        class="form-control"
+        [class.is-invalid]="esInvalido('url')"
+        [class.is-valid]="urlEstaDisponible()"
+        placeholder="mi-comercio"
+        aria-describedby="reg-url-estado"
+      />
+      @if (urlEstaDisponible()) {
+        <span class="input-group-text campo-url__icono" aria-hidden="true">
+          <i class="bi bi-check-circle-fill"></i>
+        </span>
+      }
+    </div>
+    <div id="reg-url-estado">
+      @if (esInvalido('url')) {
+        <div class="invalid-feedback d-block">{{ mensaje('url', 'La URL') }}</div>
+      } @else if (estaVerificando('url')) {
+        <div class="form-text campo-url__estado campo-url__estado--verificando">
+          <span
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          <span>Verificando disponibilidad</span>
+        </div>
+      } @else if (urlEstaDisponible()) {
+        <div class="form-text campo-url__estado campo-url__estado--disponible">
+          <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+          <span>Dirección disponible</span>
+        </div>
+      }
+    </div>
   </div>
 
   <div class="row g-2">
@@ -63,8 +90,17 @@
   </div>
 
   <div class="mb-2">
-    <label class="form-label small" for="reg-direccion">Dirección (opcional)</label>
-    <input id="reg-direccion" type="text" formControlName="direccion" class="form-control" />
+    <label class="form-label small" for="reg-direccion">Dirección</label>
+    <input
+      id="reg-direccion"
+      type="text"
+      formControlName="direccion"
+      class="form-control"
+      [class.is-invalid]="esInvalido('direccion')"
+    />
+    @if (esInvalido('direccion')) {
+      <div class="invalid-feedback d-block">{{ mensaje('direccion', 'La dirección') }}</div>
+    }
   </div>
 
   <hr class="my-3" />
@@ -115,15 +151,25 @@
   </div>
 
   <div class="mb-3">
-    <label class="form-label small" for="reg-telefono">Teléfono (opcional)</label>
-    <input id="reg-telefono" type="tel" formControlName="telefono" class="form-control" />
+    <label class="form-label small" for="reg-telefono">Teléfono</label>
+    <input
+      id="reg-telefono"
+      type="tel"
+      formControlName="telefono"
+      class="form-control"
+      [class.is-invalid]="esInvalido('telefono')"
+      autocomplete="tel"
+    />
+    @if (esInvalido('telefono')) {
+      <div class="invalid-feedback d-block">{{ mensaje('telefono', 'El teléfono') }}</div>
+    }
   </div>
 
   @if (error()) {
     <div class="alert alert-danger py-2 small">{{ error() }}</div>
   }
 
-  <button type="submit" class="btn btn-success w-100" [disabled]="cargando()">
+  <button type="submit" class="btn btn-success w-100" [disabled]="cargando() || formulario.pending">
     {{ cargando() ? 'Creando…' : 'Crear comercio' }}
   </button>
 </form>

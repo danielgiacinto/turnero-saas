@@ -109,8 +109,8 @@ model Comercio {
   direccion                          String?
   barrio                             String
   rubro                              TipoRubro
-  fecha_vencimiento                  DateTime
-  created_at                         DateTime               @default(now())
+  fecha_vencimiento                  DateTime               @db.Timestamptz(3)
+  created_at                         DateTime               @default(now()) @db.Timestamptz(3)
   mp_preapproval_id                  String?
   logo_url                           String?
   requiere_confirmacion_asistencia   Boolean                @default(true)
@@ -144,7 +144,7 @@ model Usuario {
   porcentaje_comision    Decimal    @default(0) @db.Decimal(10, 2)
   activo                 Boolean    @default(true)
   email_verificado       Boolean    @default(false)
-  email_verificado_fecha DateTime?
+  email_verificado_fecha DateTime? @db.Timestamptz(3)
 
   comercio       Comercio?      @relation(fields: [comercio_id], references: [id])
   horarios       Horario[]
@@ -192,8 +192,8 @@ model Cliente {
   telefono                  String
   email_verificado          Boolean   @default(false)
   telefono_verificado       Boolean   @default(false)
-  email_verificado_fecha    DateTime?
-  telefono_verificado_fecha DateTime?
+  email_verificado_fecha    DateTime? @db.Timestamptz(3)
+  telefono_verificado_fecha DateTime? @db.Timestamptz(3)
   token_acceso_portal       String?   @unique
 
   turnos         Turno[]
@@ -215,11 +215,11 @@ model Turno {
   estado                         EstadoTurno
   origen_reserva                 OrigenReserva
   creado_por_usuario_id          String?                @db.Uuid
-  fecha_hora                     DateTime
-  reserva_expira_fecha           DateTime?
+  fecha_hora                     DateTime               @db.Timestamptz(3)
+  reserva_expira_fecha           DateTime?              @db.Timestamptz(3)
   confirmacion_asistencia        ConfirmacionAsistencia @default(no_requerida)
-  confirmacion_asistencia_fecha  DateTime?
-  limite_confirmacion_asistencia DateTime?
+  confirmacion_asistencia_fecha  DateTime?              @db.Timestamptz(3)
+  limite_confirmacion_asistencia DateTime?              @db.Timestamptz(3)
 
   comercio       Comercio       @relation(fields: [comercio_id], references: [id])
   cliente        Cliente        @relation(fields: [cliente_id], references: [id])
@@ -240,12 +240,12 @@ model Ficha {
   comercio_id       String    @db.Uuid
   cliente_id        String    @db.Uuid
   profesional_id    String    @db.Uuid
-  fecha             DateTime
+  fecha             DateTime  @db.Timestamptz(3)
   datos_dinamicos   Json
   visible_cliente   Boolean   @default(false)
   titulo_cliente    String?
   contenido_cliente Json?
-  publicado_fecha   DateTime?
+  publicado_fecha   DateTime? @db.Timestamptz(3)
 
   comercio    Comercio @relation(fields: [comercio_id], references: [id])
   cliente     Cliente  @relation(fields: [cliente_id], references: [id])
@@ -264,7 +264,7 @@ model Movimiento {
   metodo_pago                MetodoPago
   concepto                   String
   monto_comision_profesional Decimal        @db.Decimal(10, 2)
-  fecha                      DateTime
+  fecha                      DateTime       @db.Timestamptz(3)
 
   comercio    Comercio @relation(fields: [comercio_id], references: [id])
   turno       Turno?   @relation(fields: [turno_id], references: [id])
@@ -282,7 +282,7 @@ model Notificacion {
   destinatario       String
   plantilla_nombre   String
   datos_variables    Json
-  fecha_programada   DateTime
+  fecha_programada   DateTime           @db.Timestamptz(3)
   estado             EstadoNotificacion
   intentos           Int                @default(0)
   error_log          String?
@@ -307,9 +307,9 @@ model Verificacion {
   canal        CanalVerificacion
   intentos     Int                   @default(0)
   max_intentos Int                   @default(5)
-  expira_fecha DateTime
-  usado_fecha  DateTime?
-  created_at   DateTime              @default(now())
+  expira_fecha DateTime              @db.Timestamptz(3)
+  usado_fecha  DateTime?             @db.Timestamptz(3)
+  created_at   DateTime              @default(now()) @db.Timestamptz(3)
 
   cliente Cliente? @relation(fields: [cliente_id], references: [id])
   turno   Turno?   @relation(fields: [turno_id], references: [id])
@@ -325,8 +325,8 @@ model Invitacion {
   token       String           @unique
   estado      EstadoInvitacion @default(pendiente)
   usuario_id  String?          @db.Uuid
-  expiration  DateTime
-  created_at  DateTime         @default(now())
+  expiration  DateTime         @db.Timestamptz(3)
+  created_at  DateTime         @default(now()) @db.Timestamptz(3)
 
   comercio Comercio @relation(fields: [comercio_id], references: [id])
   usuario  Usuario? @relation(fields: [usuario_id], references: [id])
