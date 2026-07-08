@@ -4,7 +4,7 @@
       class="panel-comercio__sidebar"
       [class.panel-comercio__sidebar--abierto]="menuAbierto()"
     >
-      <div class="panel-comercio__marca">turnero</div>
+      <div class="panel-comercio__marca">SaTu</div>
       <a
         routerLink="/panel"
         routerLinkActive="panel-comercio__nav-item--activo"
@@ -76,16 +76,25 @@
               <span class="text-muted d-none d-sm-inline"> · {{ u.nombre }}</span>
             }
           </span>
+
+          <div class="panel-comercio__suscripcion d-flex align-items-center gap-1 flex-shrink-0">
+            <span class="small text-muted d-none d-sm-inline">Suscripción:</span>
+            <span [class]="claseBadgeSuscripcion(c.estado_suscripcion)">
+              {{ etiquetaEstadoSuscripcion(c.estado_suscripcion) }}
+            </span>
+            <span
+              class="panel-comercio__info-vencimiento"
+              tabindex="0"
+              role="img"
+              [attr.aria-label]="'Vence el ' + (c.fecha_vencimiento | date: 'dd/MM/yyyy')"
+            >
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+              <span class="panel-comercio__tooltip" role="tooltip">
+                Vence el {{ c.fecha_vencimiento | date: 'dd/MM/yyyy' }}
+              </span>
+            </span>
+          </div>
         }
-        <a
-          routerLink="/panel/configuracion"
-          class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
-          aria-label="Configuración"
-          title="Configuración"
-        >
-          <i class="bi bi-gear" aria-hidden="true"></i>
-          <span class="d-none d-md-inline">Configuración</span>
-        </a>
         <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cerrarSesion()">
           <i class="bi bi-box-arrow-right me-1 d-none d-sm-inline" aria-hidden="true"></i>
           Salir

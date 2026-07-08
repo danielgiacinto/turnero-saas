@@ -1,4 +1,4 @@
-# Turnero SaaS
+# SaTu
 
 Software orientado a distintos profesionales y comercios para que puedan **gestionar sus turnos** y el seguimiento de sus **pacientes o clientes** de forma sencilla y práctica.
 

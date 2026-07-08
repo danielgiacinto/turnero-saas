@@ -24,10 +24,6 @@
     font-size: 1.5rem;
     flex-shrink: 0;
   }
-
-  &__link {
-    background-color: var(--color-fondo) !important;
-  }
 }
 
 .prof-tabla {
@@ -63,5 +59,27 @@
     border-color: var(--color-acento);
     color: var(--color-texto);
     box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--color-acento) 25%, transparent);
+  }
+}
+
+.prof-modal {
+  z-index: 1060;
+
+  &__backdrop {
+    z-index: 1055;
+  }
+
+  &__contenido {
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto);
+  }
+
+  .modal-title {
+    color: var(--color-texto);
+  }
+
+  .btn-close {
+    filter: var(--bs-btn-close-white-filter, none);
   }
 }

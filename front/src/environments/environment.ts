@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.turnero-saas.com/api',
+  apiUrl: 'https://api.satu.app/api',
   googleClientId: '',
 };

@@ -37,5 +37,5 @@ export const PALETAS_DISPONIBLES: OpcionPaleta[] = [
 export const PALETA_PREDETERMINADA: IdPaletaTema = 'lima';
 export const MODO_PREDETERMINADO_PANEL: ModoTema = 'oscuro';
 
-export const CLAVE_STORAGE_PALETA = 'turnero-panel-paleta';
-export const CLAVE_STORAGE_MODO = 'turnero-panel-modo';
+export const CLAVE_STORAGE_PALETA = 'satu-panel-paleta';
+export const CLAVE_STORAGE_MODO = 'satu-panel-modo';

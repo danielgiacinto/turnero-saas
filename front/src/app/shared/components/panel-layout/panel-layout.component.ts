@@ -1,3 +1,4 @@
+import { DatePipe, isPlatformBrowser } from '@angular/common';
 import {
   AfterViewInit,
   Component,
@@ -9,11 +10,14 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { TemaPanelService } from '../../../core/services/tema-panel.service';
 import { AuthService } from '../../../core/services/auth.service';
+import {
+  claseBadgeSuscripcion,
+  etiquetaEstadoSuscripcion,
+} from '../../../core/utils/suscripcion.util';
 
 /**
  * Shell del panel admin/profesional.
@@ -21,7 +25,7 @@ import { AuthService } from '../../../core/services/auth.service';
  */
 @Component({
   selector: 'app-panel-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, DatePipe],
   templateUrl: './panel-layout.component.html',
   styleUrl: './panel-layout.component.scss',
 })
@@ -38,6 +42,9 @@ export class PanelLayoutComponent implements AfterViewInit {
   readonly comercio = this.auth.comercio;
   readonly esAdmin = computed(() => this.auth.usuario()?.rol === 'admin');
   readonly menuAbierto = signal(false);
+
+  readonly etiquetaEstadoSuscripcion = etiquetaEstadoSuscripcion;
+  readonly claseBadgeSuscripcion = claseBadgeSuscripcion;
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {

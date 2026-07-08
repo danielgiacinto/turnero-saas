@@ -1,14 +1,16 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
-import { IdPaletaTema, ModoTema } from '../../core/models/paleta-tema.model';
-import { TemaPanelService } from '../../core/services/tema-panel.service';
+import { IdPaletaTema, ModoTema } from '../../../../core/models/paleta-tema.model';
+import { TemaPanelService } from '../../../../core/services/tema-panel.service';
 
 @Component({
-  selector: 'app-panel-configuracion',
-  templateUrl: './panel-configuracion.component.html',
-  styleUrl: './panel-configuracion.component.scss',
+  selector: 'app-configuracion-apariencia',
+  imports: [RouterLink],
+  templateUrl: './apariencia.component.html',
+  styleUrl: './apariencia.component.scss',
 })
-export class PanelConfiguracionComponent {
+export class ConfiguracionAparienciaComponent {
   private readonly temaPanel = inject(TemaPanelService);
 
   readonly paletas = this.temaPanel.paletas;

@@ -60,27 +60,6 @@
             <span>{{ invitacionExito() }}</span>
           </div>
         }
-
-        @if (linkInvitacion(); as link) {
-          <div class="prof-invitacion__link panel-comercio__tarjeta p-2">
-            <p class="small text-muted mb-1">
-              <i class="bi bi-link-45deg" aria-hidden="true"></i>
-              Link de invitación
-            </p>
-            <div class="d-flex flex-wrap gap-2 align-items-center">
-              <code class="small text-break flex-grow-1">{{ link }}</code>
-              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="copiarLink()">
-                @if (linkCopiado()) {
-                  <i class="bi bi-clipboard-check me-1" aria-hidden="true"></i>
-                  Copiado
-                } @else {
-                  <i class="bi bi-clipboard me-1" aria-hidden="true"></i>
-                  Copiar
-                }
-              </button>
-            </div>
-          </div>
-        }
       </form>
     </div>
   </div>
@@ -103,6 +82,13 @@
       Actualizar
     </button>
   </div>
+
+  @if (listadoExito()) {
+    <div class="alert alert-success py-2 small mb-3 d-flex align-items-start gap-2">
+      <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+      <span>{{ listadoExito() }}</span>
+    </div>
+  }
 
   @if (cargandoListado()) {
     <p class="small text-muted mb-0">
@@ -127,6 +113,7 @@
             <th scope="col" class="d-none d-lg-table-cell">Matrícula</th>
             <th scope="col">Cuenta</th>
             <th scope="col">Estado</th>
+            <th scope="col" class="text-end">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -153,6 +140,17 @@
                   <span class="badge-estado badge-estado--cancelado">Inactivo</span>
                 }
               </td>
+              <td class="text-end">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  title="Eliminar profesional"
+                  (click)="abrirConfirmacionEliminarProfesional(p)"
+                >
+                  <i class="bi bi-trash" aria-hidden="true"></i>
+                  <span class="d-none d-sm-inline ms-1">Eliminar</span>
+                </button>
+              </td>
             </tr>
           }
         </tbody>
@@ -174,6 +172,7 @@
             <th scope="col">Email</th>
             <th scope="col">Vence</th>
             <th scope="col">Estado</th>
+            <th scope="col" class="text-end">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -187,10 +186,92 @@
                   Esperando aceptación
                 </span>
               </td>
+              <td class="text-end">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  title="Cancelar invitación"
+                  (click)="abrirConfirmacionCancelarInvitacion(inv)"
+                >
+                  <i class="bi bi-x-circle" aria-hidden="true"></i>
+                  <span class="d-none d-sm-inline ms-1">Cancelar</span>
+                </button>
+              </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
   </section>
+}
+
+@if (modalConfirmacion()) {
+  <div
+    class="modal fade show d-block prof-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'modal-borrado-titulo'"
+    (click)="cerrarModal()"
+  >
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content prof-modal__contenido">
+        <div class="modal-header border-0 pb-0">
+          <h2 id="modal-borrado-titulo" class="modal-title h6 d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill text-warning" aria-hidden="true"></i>
+            {{ tituloModal() }}
+          </h2>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Cerrar"
+            [disabled]="borradoCargando()"
+            (click)="cerrarModal()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          @if (modalConfirmacion(); as modal) {
+            @if (modal.tipo === 'profesional') {
+              <p class="mb-0 small">
+                ¿Estás seguro de que querés eliminar a <strong>{{ modal.etiqueta }}</strong>? Se borrará su
+                cuenta y ya no podrá acceder al panel.
+              </p>
+            } @else {
+              <p class="mb-0 small">
+                ¿Cancelar la invitación enviada a <strong>{{ modal.etiqueta }}</strong>? El enlace dejará de
+                funcionar.
+              </p>
+            }
+          }
+          @if (borradoError()) {
+            <div class="alert alert-danger py-2 small mt-3 mb-0">{{ borradoError() }}</div>
+          }
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            [disabled]="borradoCargando()"
+            (click)="cerrarModal()"
+          >
+            No, volver
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-danger"
+            [disabled]="borradoCargando()"
+            (click)="confirmarBorrado()"
+          >
+            @if (borradoCargando()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              Procesando…
+            } @else {
+              {{ textoBotonConfirmar() }}
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show prof-modal__backdrop"></div>
 }

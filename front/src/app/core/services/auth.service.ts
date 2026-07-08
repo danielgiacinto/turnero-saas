@@ -22,7 +22,7 @@ interface RespuestaApi<T> {
   datos: T;
 }
 
-const CLAVE_TOKEN = 'turnero-staff-token';
+const CLAVE_TOKEN = 'satu-staff-token';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -156,9 +156,9 @@ export class AuthService {
       );
   }
 
-  invitar(email: string): Observable<{ email: string; link: string }> {
+  invitar(email: string): Observable<{ mensaje: string; email: string }> {
     return this.http
-      .post<RespuestaApi<{ email: string; link: string }>>(`${this.baseUrl}/invitar`, { email })
+      .post<RespuestaApi<{ mensaje: string; email: string }>>(`${this.baseUrl}/invitar`, { email })
       .pipe(map((res) => res.datos));
   }
 
@@ -166,6 +166,23 @@ export class AuthService {
     return this.http
       .get<RespuestaApi<ListadoProfesionales>>(`${this.baseUrl}/profesionales`)
       .pipe(map((res) => res.datos));
+  }
+
+  eliminarProfesional(id: string): Observable<{ mensaje: string }> {
+    return this.http
+      .delete<RespuestaApi<{ mensaje: string }>>(`${this.baseUrl}/profesionales/${id}`)
+      .pipe(map((res) => res.datos));
+  }
+
+  cancelarInvitacion(id: string): Observable<{ mensaje: string }> {
+    return this.http
+      .delete<RespuestaApi<{ mensaje: string }>>(`${this.baseUrl}/invitaciones/${id}`)
+      .pipe(map((res) => res.datos));
+  }
+
+  /** Actualiza nombre/url del comercio en memoria (p. ej. tras editar en configuración). */
+  actualizarComercioSesion(comercio: ComercioSesion): void {
+    this.comercioSignal.set(comercio);
   }
 
   cerrarSesion(): void {

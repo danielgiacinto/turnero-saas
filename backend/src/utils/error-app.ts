@@ -43,3 +43,20 @@ export class ErrorEmailNoVerificado extends ErrorApp {
     this.name = 'ErrorEmailNoVerificado';
   }
 }
+
+/**
+ * Se lanza cuando la suscripción del comercio no permite usar el panel.
+ * El login sigue permitido; el front muestra la pantalla de aviso.
+ */
+export class ErrorSuscripcionInactiva extends ErrorApp {
+  constructor(
+    mensaje = 'La suscripción de tu comercio no está activa.',
+    detalle?: { estado_suscripcion: string; fecha_vencimiento: Date },
+  ) {
+    super(mensaje, 403, {
+      codigo: 'suscripcion_inactiva',
+      ...detalle,
+    });
+    this.name = 'ErrorSuscripcionInactiva';
+  }
+}

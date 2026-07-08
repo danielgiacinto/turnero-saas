@@ -1,0 +1,36 @@
+:host {
+  display: block;
+}
+
+.config-voltar {
+  color: var(--color-texto-muted);
+
+  &:hover {
+    color: var(--color-acento);
+  }
+}
+
+.panel-comercio .input-group-text {
+  background-color: var(--color-fondo);
+  border-color: var(--color-borde);
+  color: var(--color-texto-muted);
+  font-size: 0.8125rem;
+}
+
+.panel-comercio .form-control,
+.panel-comercio .form-select {
+  background-color: var(--color-superficie);
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+
+  &:focus {
+    background-color: var(--color-superficie);
+    border-color: var(--color-acento);
+    color: var(--color-texto);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--color-acento) 25%, transparent);
+  }
+
+  &.is-valid {
+    border-color: var(--bs-success, #198754);
+  }
+}

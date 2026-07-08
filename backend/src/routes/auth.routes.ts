@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authController } from '../controllers/auth.controller';
 import { autenticarStaff, requerirComercio, requerirRol } from '../middlewares/auth.middleware';
+import { requerirSuscripcionActiva } from '../middlewares/suscripcion.middleware';
 import { RolUsuario } from '@prisma/client';
 
 export const authRoutes = Router();
@@ -19,9 +20,32 @@ staffRoutes.get(
   autenticarStaff,
   requerirRol(RolUsuario.admin),
   requerirComercio,
+  requerirSuscripcionActiva,
   authController.listarProfesionales,
 );
-staffRoutes.post('/invitar', autenticarStaff, requerirRol(RolUsuario.admin), authController.invitar);
+staffRoutes.delete(
+  '/profesionales/:id',
+  autenticarStaff,
+  requerirRol(RolUsuario.admin),
+  requerirComercio,
+  requerirSuscripcionActiva,
+  authController.eliminarProfesional,
+);
+staffRoutes.post(
+  '/invitar',
+  autenticarStaff,
+  requerirRol(RolUsuario.admin),
+  requerirSuscripcionActiva,
+  authController.invitar,
+);
+staffRoutes.delete(
+  '/invitaciones/:id',
+  autenticarStaff,
+  requerirRol(RolUsuario.admin),
+  requerirComercio,
+  requerirSuscripcionActiva,
+  authController.cancelarInvitacion,
+);
 staffRoutes.get('/invitacion/:token', authController.obtenerInvitacion);
 staffRoutes.post('/invitacion/:token/completar', authController.completarInvitacion);
 

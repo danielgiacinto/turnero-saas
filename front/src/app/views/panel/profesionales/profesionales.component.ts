@@ -5,18 +5,26 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   InvitacionPendienteListado,
   ProfesionalListado,
-} from '../../core/models/usuario.model';
-import { AuthService } from '../../core/services/auth.service';
+} from '../../../core/models/usuario.model';
+import { AuthService } from '../../../core/services/auth.service';
 import {
   controlInvalido,
   mensajeValidacion,
-} from '../../shared/utils/validacion-formulario.util';
+} from '../../../shared/utils/validacion-formulario.util';
+
+type TipoBorrado = 'profesional' | 'invitacion';
+
+interface ConfirmacionBorrado {
+  tipo: TipoBorrado;
+  id: string;
+  etiqueta: string;
+}
 
 @Component({
   selector: 'app-panel-profesionales',
   imports: [ReactiveFormsModule, DatePipe],
-  templateUrl: './panel-profesionales.component.html',
-  styleUrl: './panel-profesionales.component.scss',
+  templateUrl: './profesionales.component.html',
+  styleUrl: './profesionales.component.scss',
 })
 export class PanelProfesionalesComponent implements OnInit {
   private readonly auth = inject(AuthService);
@@ -30,9 +38,12 @@ export class PanelProfesionalesComponent implements OnInit {
   readonly invitacionCargando = signal(false);
   readonly invitacionError = signal<string | null>(null);
   readonly invitacionExito = signal<string | null>(null);
-  readonly linkInvitacion = signal<string | null>(null);
-  readonly linkCopiado = signal(false);
   readonly formularioInvitacionEnviado = signal(false);
+
+  readonly modalConfirmacion = signal<ConfirmacionBorrado | null>(null);
+  readonly borradoCargando = signal(false);
+  readonly borradoError = signal<string | null>(null);
+  readonly listadoExito = signal<string | null>(null);
 
   readonly formularioInvitacion = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -74,8 +85,6 @@ export class PanelProfesionalesComponent implements OnInit {
     this.formularioInvitacionEnviado.set(true);
     this.invitacionError.set(null);
     this.invitacionExito.set(null);
-    this.linkInvitacion.set(null);
-    this.linkCopiado.set(false);
 
     if (this.formularioInvitacion.invalid) {
       return;
@@ -86,8 +95,7 @@ export class PanelProfesionalesComponent implements OnInit {
 
     this.auth.invitar(email).subscribe({
       next: (res) => {
-        this.invitacionExito.set(`Invitación enviada a ${res.email}.`);
-        this.linkInvitacion.set(res.link);
+        this.invitacionExito.set(res.mensaje);
         this.formularioInvitacion.reset();
         this.formularioInvitacionEnviado.set(false);
         this.invitacionCargando.set(false);
@@ -100,17 +108,74 @@ export class PanelProfesionalesComponent implements OnInit {
     });
   }
 
-  async copiarLink(): Promise<void> {
-    const link = this.linkInvitacion();
-    if (!link) {
+  abrirConfirmacionEliminarProfesional(profesional: ProfesionalListado): void {
+    this.borradoError.set(null);
+    this.modalConfirmacion.set({
+      tipo: 'profesional',
+      id: profesional.id,
+      etiqueta: profesional.nombre,
+    });
+  }
+
+  abrirConfirmacionCancelarInvitacion(invitacion: InvitacionPendienteListado): void {
+    this.borradoError.set(null);
+    this.modalConfirmacion.set({
+      tipo: 'invitacion',
+      id: invitacion.id,
+      etiqueta: invitacion.email,
+    });
+  }
+
+  cerrarModal(): void {
+    if (this.borradoCargando()) {
       return;
     }
-    try {
-      await navigator.clipboard.writeText(link);
-      this.linkCopiado.set(true);
-      setTimeout(() => this.linkCopiado.set(false), 2500);
-    } catch {
-      this.invitacionError.set('No se pudo copiar el enlace. Copialo manualmente.');
+    this.modalConfirmacion.set(null);
+    this.borradoError.set(null);
+  }
+
+  confirmarBorrado(): void {
+    const modal = this.modalConfirmacion();
+    if (!modal) {
+      return;
     }
+
+    this.borradoCargando.set(true);
+    this.borradoError.set(null);
+
+    const peticion =
+      modal.tipo === 'profesional'
+        ? this.auth.eliminarProfesional(modal.id)
+        : this.auth.cancelarInvitacion(modal.id);
+
+    peticion.subscribe({
+      next: (res) => {
+        this.listadoExito.set(res.mensaje);
+        this.modalConfirmacion.set(null);
+        this.borradoCargando.set(false);
+        this.cargarListado();
+        setTimeout(() => this.listadoExito.set(null), 4000);
+      },
+      error: (err) => {
+        this.borradoError.set(err?.error?.mensaje ?? 'No se pudo completar la operación.');
+        this.borradoCargando.set(false);
+      },
+    });
+  }
+
+  tituloModal(): string {
+    const modal = this.modalConfirmacion();
+    if (!modal) {
+      return '';
+    }
+    return modal.tipo === 'profesional' ? 'Eliminar profesional' : 'Cancelar invitación';
+  }
+
+  textoBotonConfirmar(): string {
+    const modal = this.modalConfirmacion();
+    if (!modal) {
+      return 'Confirmar';
+    }
+    return modal.tipo === 'profesional' ? 'Sí, eliminar' : 'Sí, cancelar';
   }
 }

@@ -2,7 +2,14 @@
   display: block;
 }
 
-// Cards de modo claro / oscuro
+.config-voltar {
+  color: var(--color-texto-muted);
+
+  &:hover {
+    color: var(--color-acento);
+  }
+}
+
 .config-modo-card {
   display: flex;
   align-items: center;
@@ -67,7 +74,6 @@
   }
 }
 
-// Cards de paleta
 .config-paleta-card {
   position: relative;
   padding: 0;

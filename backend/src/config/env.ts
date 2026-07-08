@@ -2,10 +2,10 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 /**
- * Variables requeridas en backend/.env (no se sube a Git):
- *   PORT, NODE_ENV, DATABASE_URL, DIRECT_URL
+ * Variables en backend/.env (único archivo de config local; no se sube a Git):
+ *   PORT, NODE_ENV, TZ, DATABASE_URL, DIRECT_URL
  *   JWT_SECRET, JWT_EXPIRES_IN, GOOGLE_CLIENT_ID, FRONTEND_URL
- * Ver schema.prisma → datasource db para detalle de conexión Supabase.
+ *   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM
  */
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -24,15 +24,15 @@ export const env = {
   esProduccion: entorno === 'production',
   esDesarrollo: entorno !== 'production',
   databaseUrl: process.env.DATABASE_URL ?? '',
-  jwtSecret: process.env.JWT_SECRET ?? 'turnero-dev-secret',
+  jwtSecret: process.env.JWT_SECRET ?? 'satu-dev-secret',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
   frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:4200',
   smtpHost: process.env.SMTP_HOST ?? '',
   smtpPort: Number(process.env.SMTP_PORT) || 587,
   smtpUser: process.env.SMTP_USER ?? '',
-  smtpPass: process.env.SMTP_PASS ?? '',
-  emailFrom: process.env.EMAIL_FROM ?? 'Turnero <no-reply@localhost>',
+  smtpPass: (process.env.SMTP_PASS ?? '').replace(/\s/g, ''),
+  emailFrom: process.env.EMAIL_FROM ?? 'SaTu <no-reply@localhost>',
   zonaHoraria: process.env.TZ ?? 'America/Argentina/Buenos_Aires',
 };
 

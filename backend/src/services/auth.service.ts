@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import { Comercio, EstadoInvitacion, RolUsuario, Usuario } from '@prisma/client';
 import { OAuth2Client } from 'google-auth-library';
 import { prisma } from '../config/prisma';
-import { env } from '../config/env';
+import { env, smtpEstaConfigurado } from '../config/env';
 import { compararPassword, hashearPassword } from '../utils/password.util';
 import { generarJwt } from '../utils/jwt.util';
 import { ahora, sumarDias } from '../utils/fecha.util';
@@ -13,6 +13,7 @@ import {
   ErrorValidacion,
 } from '../utils/error-app';
 import { verificacionStaffService } from './verificacion-staff.service';
+import { emailService } from './email.service';
 import {
   CompletarInvitacionDto,
   InvitarStaffDto,
@@ -38,6 +39,8 @@ export interface ComercioPublico {
   id: string;
   nombre: string;
   url: string;
+  estado_suscripcion: Comercio['estado_suscripcion'];
+  fecha_vencimiento: Date;
 }
 
 export interface ResultadoAutenticacion {
@@ -50,14 +53,14 @@ export interface ResultadoRegistroPendiente {
   requiere_verificacion: true;
   email: string;
   mensaje: string;
-  /** Solo en desarrollo, cuando SMTP no está configurado. */
+  /** Solo en desarrollo y sin SMTP, para poder probar OTP sin correo. */
   codigo_desarrollo?: string;
 }
 
 export interface ResultadoReenvioCodigo {
   email: string;
   mensaje: string;
-  /** Solo en desarrollo, cuando SMTP no está configurado. */
+  /** Solo en desarrollo y sin SMTP, para poder probar OTP sin correo. */
   codigo_desarrollo?: string;
 }
 
@@ -75,7 +78,13 @@ function aComercioPublico(comercio: Comercio | null): ComercioPublico | null {
   if (!comercio) {
     return null;
   }
-  return { id: comercio.id, nombre: comercio.nombre, url: comercio.url };
+  return {
+    id: comercio.id,
+    nombre: comercio.nombre,
+    url: comercio.url,
+    estado_suscripcion: comercio.estado_suscripcion,
+    fecha_vencimiento: comercio.fecha_vencimiento,
+  };
 }
 
 function emitirToken(usuario: Usuario): string {
@@ -146,6 +155,7 @@ export const authService = {
   async verificarDisponibilidadComercio(params: {
     url?: string;
     nombre?: string;
+    excluirComercioId?: string;
   }): Promise<DisponibilidadComercioDto> {
     const resultado: DisponibilidadComercioDto = {
       url_disponible: true,
@@ -154,14 +164,22 @@ export const authService = {
 
     const url = params.url?.trim().toLowerCase();
     if (url) {
-      const urlExistente = await prisma.comercio.findUnique({ where: { url } });
+      const urlExistente = await prisma.comercio.findFirst({
+        where: {
+          url,
+          ...(params.excluirComercioId ? { NOT: { id: params.excluirComercioId } } : {}),
+        },
+      });
       resultado.url_disponible = !urlExistente;
     }
 
     const nombre = params.nombre?.trim();
     if (nombre) {
       const nombreExistente = await prisma.comercio.findFirst({
-        where: { nombre: { equals: nombre, mode: 'insensitive' } },
+        where: {
+          nombre: { equals: nombre, mode: 'insensitive' },
+          ...(params.excluirComercioId ? { NOT: { id: params.excluirComercioId } } : {}),
+        },
       });
       resultado.nombre_disponible = !nombreExistente;
     }
@@ -216,7 +234,8 @@ export const authService = {
       requiere_verificacion: true,
       email: enmascararEmail(email),
       mensaje: 'Te enviamos un código a tu correo para activar la cuenta.',
-      ...(env.esDesarrollo && { codigo_desarrollo: codigo }),
+      // Nunca en producción. En local solo si no hay SMTP (para poder probar sin mail).
+      ...(env.esDesarrollo && !smtpEstaConfigurado() && { codigo_desarrollo: codigo }),
     };
   },
 
@@ -226,6 +245,12 @@ export const authService = {
     const comercio = usuario.comercio_id
       ? await prisma.comercio.findUnique({ where: { id: usuario.comercio_id } })
       : null;
+
+    if (comercio) {
+      void emailService
+        .enviarBienvenidaStaff(usuario.email, usuario.nombre, comercio.nombre)
+        .catch((error) => console.error('[Email] No se pudo enviar bienvenida:', error));
+    }
 
     return {
       token: emitirToken(usuario),
@@ -239,7 +264,7 @@ export const authService = {
     return {
       email: enmascararEmail(normalizarEmail(dto.email)),
       mensaje: 'Te enviamos un nuevo código a tu correo.',
-      ...(env.esDesarrollo && { codigo_desarrollo: codigo }),
+      ...(env.esDesarrollo && !smtpEstaConfigurado() && { codigo_desarrollo: codigo }),
     };
   },
 
@@ -381,10 +406,62 @@ export const authService = {
     return { profesionales, invitaciones_pendientes };
   },
 
+  async eliminarProfesional(comercioId: string, profesionalId: string): Promise<{ mensaje: string }> {
+    const profesional = await prisma.usuario.findFirst({
+      where: { id: profesionalId, comercio_id: comercioId, rol: RolUsuario.profesional },
+    });
+
+    if (!profesional) {
+      throw new ErrorNoEncontrado('No encontramos ese profesional en tu comercio.');
+    }
+
+    const [turnos, fichas, movimientos] = await Promise.all([
+      prisma.turno.count({ where: { profesional_id: profesionalId } }),
+      prisma.ficha.count({ where: { profesional_id: profesionalId } }),
+      prisma.movimiento.count({ where: { profesional_id: profesionalId } }),
+    ]);
+
+    if (turnos > 0 || fichas > 0 || movimientos > 0) {
+      throw new ErrorValidacion(
+        'No se puede eliminar este profesional porque tiene turnos, fichas o movimientos asociados.',
+      );
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.horario.deleteMany({ where: { usuario_id: profesionalId } });
+      await tx.verificacion.deleteMany({ where: { usuario_id: profesionalId } });
+      await tx.invitacion.updateMany({
+        where: { usuario_id: profesionalId },
+        data: { usuario_id: null },
+      });
+      await tx.usuario.delete({ where: { id: profesionalId } });
+    });
+
+    return { mensaje: `Se eliminó a ${profesional.nombre} del equipo.` };
+  },
+
+  async cancelarInvitacion(comercioId: string, invitacionId: string): Promise<{ mensaje: string }> {
+    const invitacion = await prisma.invitacion.findFirst({
+      where: {
+        id: invitacionId,
+        comercio_id: comercioId,
+        estado: EstadoInvitacion.pendiente,
+      },
+    });
+
+    if (!invitacion) {
+      throw new ErrorNoEncontrado('No encontramos esa invitación pendiente.');
+    }
+
+    await prisma.invitacion.delete({ where: { id: invitacionId } });
+
+    return { mensaje: `Se canceló la invitación a ${invitacion.email}.` };
+  },
+
   async crearInvitacion(
     comercioId: string,
     dto: InvitarStaffDto,
-  ): Promise<{ token: string; email: string; link: string }> {
+  ): Promise<{ mensaje: string; email: string }> {
     const email = normalizarEmail(dto.email);
 
     const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
@@ -401,15 +478,32 @@ export const authService = {
 
     const token = randomBytes(32).toString('hex');
     const expiration = sumarDias(7);
+    const diasValidez = 7;
+
+    const comercio = await prisma.comercio.findUnique({ where: { id: comercioId } });
+    if (!comercio) {
+      throw new ErrorNoEncontrado('Comercio no encontrado.');
+    }
 
     await prisma.invitacion.create({
       data: { comercio_id: comercioId, email, token, expiration },
     });
 
+    const link = `${env.frontendUrl}/auth/invitacion/${token}`;
+
+    await emailService.enviarInvitacionProfesional({
+      destinatario: email,
+      nombreComercio: comercio.nombre,
+      link,
+      diasValidez,
+    }).catch((error) => {
+      console.error('[Email] No se pudo enviar la invitación por correo:', error);
+    });
+
+    // El token y el link solo viajan por email; no se exponen en la API.
     return {
-      token,
+      mensaje: 'Invitación enviada. El profesional recibirá un email con el enlace para unirse.',
       email,
-      link: `${env.frontendUrl}/auth/invitacion/${token}`,
     };
   },
 

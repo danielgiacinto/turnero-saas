@@ -4,6 +4,8 @@ import {
   effect,
   ElementRef,
   inject,
+  Injector,
+  runInInjectionContext,
   signal,
   viewChild,
 } from '@angular/core';
@@ -31,6 +33,7 @@ export class AceptarInvitacionComponent {
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
+  private readonly injector = inject(Injector);
   private readonly botonGoogle = viewChild<ElementRef<HTMLElement>>('botonGoogle');
 
   readonly googleConfigurado = this.google.estaConfigurado;
@@ -68,7 +71,9 @@ export class AceptarInvitacionComponent {
       if (!inv || this.cargandoInvitacion() || !this.googleConfigurado) {
         return;
       }
-      afterNextRender(() => this.renderizarBotonGoogle());
+      runInInjectionContext(this.injector, () => {
+        afterNextRender(() => this.renderizarBotonGoogle());
+      });
     });
   }
 

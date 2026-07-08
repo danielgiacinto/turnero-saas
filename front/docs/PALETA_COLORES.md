@@ -1,4 +1,4 @@
-# Sistema de diseño — Paletas Turnero
+# Sistema de diseño — Paletas SaTu
 
 Referencia visual interactiva: [`paletas_negro_turnero.html`](./paletas_negro_turnero.html)
 
@@ -109,7 +109,7 @@ temaPanel.establecerModo('oscuro');
 temaPanel.aplicarEnElemento(elementoHost); // al montar layout panel
 ```
 
-Preferencias guardadas en `localStorage` (`turnero-panel-paleta`, `turnero-panel-modo`).
+Preferencias guardadas en `localStorage` (`satu-panel-paleta`, `satu-panel-modo`).
 
 ### Bootstrap en panel
 

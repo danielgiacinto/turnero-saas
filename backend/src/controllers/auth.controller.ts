@@ -18,12 +18,18 @@ export const authController = {
     try {
       const url = typeof req.query.url === 'string' ? req.query.url : undefined;
       const nombre = typeof req.query.nombre === 'string' ? req.query.nombre : undefined;
+      const excluirComercioId =
+        typeof req.query.excluirComercioId === 'string' ? req.query.excluirComercioId : undefined;
 
       if (!url?.trim() && !nombre?.trim()) {
         throw new ErrorValidacion('Indicá url y/o nombre para verificar disponibilidad.');
       }
 
-      const resultado = await authService.verificarDisponibilidadComercio({ url, nombre });
+      const resultado = await authService.verificarDisponibilidadComercio({
+        url,
+        nombre,
+        excluirComercioId,
+      });
       respuestaExito(res, resultado);
     } catch (error) {
       next(error);
@@ -122,6 +128,36 @@ export const authController = {
       }
       const resultado = await authService.crearInvitacion(req.usuario.comercio_id, req.body);
       respuestaExito(res, resultado, 201);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async eliminarProfesional(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.usuario?.comercio_id) {
+        throw new ErrorNoAutorizado('El usuario no está asociado a un comercio.');
+      }
+      const resultado = await authService.eliminarProfesional(
+        req.usuario.comercio_id,
+        String(req.params.id),
+      );
+      respuestaExito(res, resultado);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async cancelarInvitacion(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.usuario?.comercio_id) {
+        throw new ErrorNoAutorizado('El usuario no está asociado a un comercio.');
+      }
+      const resultado = await authService.cancelarInvitacion(
+        req.usuario.comercio_id,
+        String(req.params.id),
+      );
+      respuestaExito(res, resultado);
     } catch (error) {
       next(error);
     }

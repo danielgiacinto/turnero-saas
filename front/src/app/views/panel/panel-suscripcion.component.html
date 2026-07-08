@@ -1,0 +1,47 @@
+<header class="mb-4">
+  <h1 class="h4 mb-1 d-flex align-items-center gap-2">
+    <i class="bi bi-exclamation-triangle-fill text-warning" aria-hidden="true"></i>
+    Suscripción
+  </h1>
+  <p class="text-muted small mb-0">Tu acceso al panel está limitado hasta regularizar el plan.</p>
+</header>
+
+<section class="panel-comercio__tarjeta suscripcion-aviso" aria-labelledby="titulo-suscripcion">
+  <div class="suscripcion-aviso__icono" aria-hidden="true">
+    <i class="bi bi-credit-card-2-front"></i>
+  </div>
+
+  <h2 id="titulo-suscripcion" class="h5 mb-2">No podés usar el panel en este momento</h2>
+  <p class="text-muted mb-3">{{ mensaje() }}</p>
+
+  @if (comercio(); as c) {
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+      <span class="small text-muted">Estado:</span>
+      <span [class]="claseBadge(c.estado_suscripcion)">
+        {{ etiquetaEstado(c.estado_suscripcion) }}
+      </span>
+      <span class="small text-muted ms-md-2">
+        Venció / vence:
+        <strong class="text-body">{{ c.fecha_vencimiento | date: 'dd/MM/yyyy' }}</strong>
+      </span>
+    </div>
+  }
+
+  <p class="small text-muted mb-3">
+    El pago online todavía no está disponible. Cuando esté listo vas a poder renovar desde acá.
+    Mientras tanto podés revisar la apariencia del panel.
+  </p>
+
+  <div class="d-flex flex-wrap gap-2">
+    <a routerLink="/panel/configuracion/apariencia" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-palette me-1" aria-hidden="true"></i>
+      Apariencia
+    </a>
+    @if (esAdmin()) {
+      <a routerLink="/panel/configuracion" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-gear me-1" aria-hidden="true"></i>
+        Configuración
+      </a>
+    }
+  </div>
+</section>

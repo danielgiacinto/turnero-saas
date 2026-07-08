@@ -1,0 +1,150 @@
+<header class="mb-4">
+  <nav class="mb-2" aria-label="Miga de pan">
+    <a routerLink="/panel/configuracion" class="config-voltar small text-decoration-none">
+      <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+      Configuración
+    </a>
+  </nav>
+  <h1 class="h4 mb-1 d-flex align-items-center gap-2">
+    <i class="bi bi-shop text-muted" aria-hidden="true"></i>
+    Datos del comercio
+  </h1>
+  <p class="text-muted small mb-0">Revisá y actualizá la información pública de tu comercio.</p>
+</header>
+
+@if (cargando()) {
+  <p class="small text-muted mb-0">
+    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    Cargando datos…
+  </p>
+} @else {
+  <section class="panel-comercio__tarjeta" aria-labelledby="titulo-datos-comercio">
+    <h2 id="titulo-datos-comercio" class="h6 mb-3">Información general</h2>
+
+    @if (error()) {
+      <div class="alert alert-danger py-2 small mb-3 d-flex align-items-start gap-2">
+        <i class="bi bi-exclamation-triangle-fill flex-shrink-0" aria-hidden="true"></i>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    @if (exito()) {
+      <div class="alert alert-success py-2 small mb-3 d-flex align-items-start gap-2">
+        <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+        <span>{{ exito() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label small" for="comercio-nombre">Nombre del comercio</label>
+          <input
+            id="comercio-nombre"
+            type="text"
+            formControlName="nombre"
+            class="form-control"
+            [class.is-invalid]="esInvalido('nombre')"
+            autocomplete="organization"
+          />
+          @if (estaVerificando('nombre')) {
+            <div class="form-text">Verificando disponibilidad…</div>
+          }
+          @if (esInvalido('nombre')) {
+            <div class="invalid-feedback d-block">{{ mensaje('nombre', 'El nombre') }}</div>
+          }
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label small" for="comercio-url">URL pública</label>
+          <div class="input-group">
+            <span class="input-group-text">/comercio/</span>
+            <input
+              id="comercio-url"
+              type="text"
+              formControlName="url"
+              class="form-control"
+              [class.is-invalid]="esInvalido('url')"
+              [class.is-valid]="urlEstaDisponible()"
+              placeholder="mi-comercio"
+              autocomplete="off"
+            />
+          </div>
+          @if (estaVerificando('url')) {
+            <div class="form-text">Verificando disponibilidad…</div>
+          }
+          @if (esInvalido('url')) {
+            <div class="invalid-feedback d-block">{{ mensaje('url', 'La URL') }}</div>
+          }
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label small" for="comercio-rubro">Rubro</label>
+          <select
+            id="comercio-rubro"
+            formControlName="rubro"
+            class="form-select"
+            [class.is-invalid]="esInvalido('rubro')"
+          >
+            @for (r of rubros; track r.valor) {
+              <option [value]="r.valor">{{ r.etiqueta }}</option>
+            }
+          </select>
+          @if (esInvalido('rubro')) {
+            <div class="invalid-feedback d-block">{{ mensaje('rubro', 'El rubro') }}</div>
+          }
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label small" for="comercio-barrio">Barrio</label>
+          <input
+            id="comercio-barrio"
+            type="text"
+            formControlName="barrio"
+            class="form-control"
+            [class.is-invalid]="esInvalido('barrio')"
+            autocomplete="address-level2"
+          />
+          @if (esInvalido('barrio')) {
+            <div class="invalid-feedback d-block">{{ mensaje('barrio', 'El barrio') }}</div>
+          }
+        </div>
+
+        <div class="col-12">
+          <label class="form-label small" for="comercio-direccion">Dirección</label>
+          <input
+            id="comercio-direccion"
+            type="text"
+            formControlName="direccion"
+            class="form-control"
+            [class.is-invalid]="esInvalido('direccion')"
+            autocomplete="street-address"
+          />
+          @if (esInvalido('direccion')) {
+            <div class="invalid-feedback d-block">{{ mensaje('direccion', 'La dirección') }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm"
+          [disabled]="guardando() || !formulario.dirty"
+          (click)="cargar()"
+        >
+          Descartar cambios
+        </button>
+        <button type="submit" class="btn btn-accento btn-sm" [disabled]="guardando()">
+          @if (guardando()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            Guardando…
+          } @else {
+            <i class="bi bi-check2 me-1" aria-hidden="true"></i>
+            Guardar cambios
+          }
+        </button>
+      </div>
+    </form>
+  </section>
+}

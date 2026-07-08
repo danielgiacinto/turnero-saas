@@ -1,8 +1,17 @@
 import nodemailer from 'nodemailer';
 
 import { env, smtpEstaConfigurado } from '../config/env';
+import {
+  armarPlantillaEmail,
+  armarTextoPlano,
+  botonPrimario,
+  codigoOtpDestacado,
+  parrafo,
+  textoSecundario,
+} from './email/plantilla-email.util';
 
 const OTP_EXPIRACION_MINUTOS = 10;
+const NOMBRE_MARCA = 'SaTu';
 
 function crearTransportador() {
   return nodemailer.createTransport({
@@ -16,59 +25,133 @@ function crearTransportador() {
   });
 }
 
-function armarCuerpoOtp(codigo: string): { texto: string; html: string } {
-  const texto = [
-    'Verificá tu cuenta en Turnero',
-    '',
-    `Tu código de verificación es: ${codigo}`,
-    '',
-    `Vence en ${OTP_EXPIRACION_MINUTOS} minutos.`,
-    'Si no solicitaste este código, podés ignorar este mensaje.',
-  ].join('\n');
+async function enviarMail(opciones: {
+  destinatario: string;
+  asunto: string;
+  texto: string;
+  html: string;
+  contextoLog: string;
+}): Promise<void> {
+  if (!smtpEstaConfigurado()) {
+    if (env.esDesarrollo) {
+      console.log(`[Email — sin SMTP] ${opciones.contextoLog} → ${opciones.destinatario}`);
+      console.log(opciones.texto);
+    }
+    return;
+  }
 
-  const html = `
-    <p>Verificá tu cuenta en <strong>Turnero</strong>.</p>
-    <p>Tu código de verificación es:</p>
-    <p style="font-size:28px;font-weight:bold;letter-spacing:0.2em;margin:16px 0">${codigo}</p>
-    <p style="color:#666;font-size:14px">Vence en ${OTP_EXPIRACION_MINUTOS} minutos.</p>
-    <p style="color:#666;font-size:14px">Si no solicitaste este código, podés ignorar este mensaje.</p>
-  `;
+  const transportador = crearTransportador();
+  await transportador.sendMail({
+    from: env.emailFrom,
+    to: opciones.destinatario,
+    subject: opciones.asunto,
+    text: opciones.texto,
+    html: opciones.html,
+  });
 
-  return { texto, html };
+  if (env.esDesarrollo) {
+    console.log(`[Email] ${opciones.contextoLog} enviado a ${opciones.destinatario}`);
+  }
 }
 
 export const emailService = {
-  /**
-   * Envía el OTP de verificación de staff por correo.
-   * Si SMTP no está configurado, solo registra en consola (desarrollo).
-   */
+  /** OTP de verificación al registrarse (dueño del comercio). */
   async enviarCodigoVerificacionStaff(destinatario: string, codigo: string): Promise<void> {
-    if (!smtpEstaConfigurado()) {
-      if (env.esDesarrollo) {
-        console.log(
-          `[OTP registro staff] ${destinatario}: ${codigo} (vence en ${OTP_EXPIRACION_MINUTOS} min)`,
-        );
-        console.log(
-          '[Email] SMTP no configurado — el código NO se envió por correo. ' +
-            'Configurá SMTP_HOST, SMTP_USER y SMTP_PASS en backend/.env o revisá esta consola.',
-        );
-      }
-      return;
-    }
+    const urlVerificar = `${env.frontendUrl}/auth/verificar-email?email=${encodeURIComponent(destinatario)}`;
 
-    const { texto, html } = armarCuerpoOtp(codigo);
-    const transportador = crearTransportador();
+    const cuerpoHtml = [
+      parrafo('¡Gracias por registrarte! Para activar tu cuenta y acceder al panel, ingresá este código:'),
+      codigoOtpDestacado(codigo),
+      parrafo(`El código vence en <strong>${OTP_EXPIRACION_MINUTOS} minutos</strong>.`),
+      botonPrimario(urlVerificar, 'Verificar mi cuenta'),
+      textoSecundario('También podés copiar el código e ingresarlo manualmente en la pantalla de verificación.'),
+    ].join('');
 
-    await transportador.sendMail({
-      from: env.emailFrom,
-      to: destinatario,
-      subject: 'Tu código de verificación — Turnero',
-      text: texto,
-      html,
+    const texto = armarTextoPlano([
+      `Verificá tu cuenta en ${NOMBRE_MARCA}`,
+      `Tu código de verificación es: ${codigo}`,
+      `Vence en ${OTP_EXPIRACION_MINUTOS} minutos.`,
+      `Ingresá en: ${urlVerificar}`,
+      'Si no solicitaste este código, podés ignorar este mensaje.',
+    ]);
+
+    await enviarMail({
+      destinatario,
+      asunto: `Tu código de verificación — ${NOMBRE_MARCA}`,
+      texto,
+      html: armarPlantillaEmail({
+        titulo: 'Verificá tu correo',
+        preheader: `Tu código es ${codigo}. Vence en ${OTP_EXPIRACION_MINUTOS} minutos.`,
+        cuerpoHtml,
+      }),
+      contextoLog: 'OTP verificación staff',
     });
+  },
 
-    if (env.esDesarrollo) {
-      console.log(`[Email] Código de verificación enviado a ${destinatario}`);
-    }
+  /** Invitación para sumarse como profesional a un comercio. */
+  async enviarInvitacionProfesional(opciones: {
+    destinatario: string;
+    nombreComercio: string;
+    link: string;
+    diasValidez: number;
+  }): Promise<void> {
+    const { destinatario, nombreComercio, link, diasValidez } = opciones;
+
+    const cuerpoHtml = [
+      parrafo(`Te invitaron a sumarte al equipo de <strong>${nombreComercio}</strong> en ${NOMBRE_MARCA}.`),
+      parrafo('Desde el panel vas a poder gestionar turnos, ver tu agenda y colaborar con el resto del equipo.'),
+      botonPrimario(link, 'Aceptar invitación'),
+      textoSecundario(`Este enlace es personal y vence en ${diasValidez} días.`),
+      textoSecundario(`Si el botón no funciona, copiá este enlace en el navegador:<br/><span style="word-break:break-all;color:#444;">${link}</span>`),
+    ].join('');
+
+    const texto = armarTextoPlano([
+      `Te invitaron a ${nombreComercio} en ${NOMBRE_MARCA}`,
+      'Aceptá la invitación desde este enlace:',
+      link,
+      `Vence en ${diasValidez} días.`,
+    ]);
+
+    await enviarMail({
+      destinatario,
+      asunto: `Te invitaron a ${nombreComercio} — ${NOMBRE_MARCA}`,
+      texto,
+      html: armarPlantillaEmail({
+        titulo: 'Sumate al equipo',
+        preheader: `Te invitaron a ${nombreComercio}. Aceptá la invitación.`,
+        cuerpoHtml,
+      }),
+      contextoLog: 'Invitación profesional',
+    });
+  },
+
+  /** Bienvenida tras verificar el correo del dueño. */
+  async enviarBienvenidaStaff(destinatario: string, nombre: string, nombreComercio: string): Promise<void> {
+    const urlPanel = `${env.frontendUrl}/panel`;
+
+    const cuerpoHtml = [
+      parrafo(`¡Hola, <strong>${nombre}</strong>! Tu cuenta quedó verificada.`),
+      parrafo(`Ya podés ingresar al panel de <strong>${nombreComercio}</strong> y empezar a configurar tu comercio.`),
+      botonPrimario(urlPanel, 'Ir al panel'),
+      parrafo('Próximos pasos: invitá a tu equipo, cargá servicios y compartí tu link público para que tus clientes saquen turnos.'),
+    ].join('');
+
+    const texto = armarTextoPlano([
+      `¡Bienvenido/a a ${NOMBRE_MARCA}, ${nombre}!`,
+      `Tu comercio ${nombreComercio} está listo.`,
+      `Ingresá al panel: ${urlPanel}`,
+    ]);
+
+    await enviarMail({
+      destinatario,
+      asunto: `¡Bienvenido/a a ${NOMBRE_MARCA}!`,
+      texto,
+      html: armarPlantillaEmail({
+        titulo: '¡Tu cuenta está activa!',
+        preheader: `Bienvenido/a a ${NOMBRE_MARCA}. Tu comercio ${nombreComercio} ya está listo.`,
+        cuerpoHtml,
+      }),
+      contextoLog: 'Bienvenida staff',
+    });
   },
 };

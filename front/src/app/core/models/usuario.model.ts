@@ -12,6 +12,8 @@ export interface ComercioSesion {
   id: string;
   nombre: string;
   url: string;
+  estado_suscripcion: 'pendiente' | 'activa' | 'suspendida' | 'cancelada';
+  fecha_vencimiento: string;
 }
 
 export interface ResultadoAutenticacion {
