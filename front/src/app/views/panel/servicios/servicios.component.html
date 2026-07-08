@@ -1,0 +1,230 @@
+<header class="mb-4 d-flex flex-wrap justify-content-between align-items-start gap-2">
+  <div>
+    <h1 class="h4 mb-1 d-flex align-items-center gap-2">
+      <i class="bi bi-scissors text-muted" aria-hidden="true"></i>
+      Servicios
+    </h1>
+    <p class="text-muted small mb-0">
+      @if (esAdmin()) {
+        Gestioná los servicios que ofrece tu comercio.
+      } @else {
+        Servicios que ofrece el comercio.
+      }
+    </p>
+  </div>
+  @if (esAdmin()) {
+    <button type="button" class="btn btn-accento btn-sm" (click)="abrirCreacion()">
+      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+      Nuevo servicio
+    </button>
+  }
+</header>
+
+@if (exitoListado()) {
+  <div class="alert alert-success py-2 small mb-3 d-flex align-items-start gap-2">
+    <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+    <span>{{ exitoListado() }}</span>
+  </div>
+}
+
+@if (cargando()) {
+  <p class="small text-muted mb-0">
+    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    Cargando servicios…
+  </p>
+} @else if (error()) {
+  <div class="alert alert-danger py-2 small mb-0">{{ error() }}</div>
+} @else if (servicios().length === 0) {
+  <div class="panel-comercio__tarjeta text-center py-5">
+    <i class="bi bi-scissors servicios-vacio__icono" aria-hidden="true"></i>
+    <p class="text-muted small mb-3 mt-2">
+      Todavía no hay servicios cargados.
+      @if (esAdmin()) {
+        Creá el primero para empezar a agendar turnos.
+      }
+    </p>
+    @if (esAdmin()) {
+      <button type="button" class="btn btn-accento btn-sm" (click)="abrirCreacion()">
+        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+        Nuevo servicio
+      </button>
+    }
+  </div>
+} @else {
+  <div class="row g-3">
+    @for (servicio of servicios(); track servicio.id) {
+      <div class="col-12 col-sm-6 col-xl-4">
+        <article class="servicio-card">
+          <div class="servicio-card__cabecera">
+            <h2 class="servicio-card__nombre">{{ servicio.nombre }}</h2>
+            <span
+              class="servicio-card__modalidad"
+              [class.servicio-card__modalidad--online]="servicio.modalidad === 'online'"
+            >
+              <i class="bi" [class]="iconoModalidad(servicio.modalidad)" aria-hidden="true"></i>
+              {{ etiquetaModalidad(servicio.modalidad) }}
+            </span>
+          </div>
+
+          <div class="servicio-card__datos">
+            <div class="servicio-card__dato">
+              <span class="servicio-card__dato-etiqueta">
+                <i class="bi bi-clock" aria-hidden="true"></i>
+                Duración
+              </span>
+              <span class="servicio-card__dato-valor">{{ servicio.duracion_minutos }} min</span>
+            </div>
+            <div class="servicio-card__dato">
+              <span class="servicio-card__dato-etiqueta">
+                <i class="bi bi-cash-coin" aria-hidden="true"></i>
+                Precio
+              </span>
+              <span class="servicio-card__dato-valor">
+                {{ servicio.precio | currency: 'ARS' : 'symbol-narrow' : '1.0-2' }}
+              </span>
+            </div>
+          </div>
+
+          @if (esAdmin()) {
+            <div class="servicio-card__acciones">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                (click)="abrirEdicion(servicio)"
+              >
+                <i class="bi bi-pencil me-1" aria-hidden="true"></i>
+                Editar
+              </button>
+            </div>
+          }
+        </article>
+      </div>
+    }
+  </div>
+}
+
+@if (modalAbierto()) {
+  <div
+    class="modal fade show d-block servicio-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-servicio-titulo"
+    (click)="cerrarModal()"
+  >
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content servicio-modal__contenido">
+        <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+          <div class="modal-header border-0 pb-0">
+            <h2 id="modal-servicio-titulo" class="modal-title h6 d-flex align-items-center gap-2">
+              <i class="bi bi-scissors" aria-hidden="true"></i>
+              {{ tituloModal() }}
+            </h2>
+            <button
+              type="button"
+              class="btn-close"
+              aria-label="Cerrar"
+              [disabled]="guardando()"
+              (click)="cerrarModal()"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label small" for="servicio-nombre">Nombre</label>
+              <input
+                id="servicio-nombre"
+                type="text"
+                formControlName="nombre"
+                class="form-control"
+                [class.is-invalid]="esInvalido('nombre')"
+                placeholder="Ej. Corte de pelo"
+              />
+              @if (esInvalido('nombre')) {
+                <div class="invalid-feedback d-block">{{ mensaje('nombre', 'El nombre') }}</div>
+              }
+            </div>
+
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label small" for="servicio-duracion">Duración (min)</label>
+                <input
+                  id="servicio-duracion"
+                  type="number"
+                  min="1"
+                  step="5"
+                  formControlName="duracion_minutos"
+                  class="form-control"
+                  [class.is-invalid]="esInvalido('duracion_minutos')"
+                />
+                @if (esInvalido('duracion_minutos')) {
+                  <div class="invalid-feedback d-block">
+                    {{ mensaje('duracion_minutos', 'La duración') }}
+                  </div>
+                }
+              </div>
+
+              <div class="col-6">
+                <label class="form-label small" for="servicio-precio">Precio</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input
+                    id="servicio-precio"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    formControlName="precio"
+                    class="form-control"
+                    [class.is-invalid]="esInvalido('precio')"
+                  />
+                </div>
+                @if (esInvalido('precio')) {
+                  <div class="invalid-feedback d-block">{{ mensaje('precio', 'El precio') }}</div>
+                }
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <label class="form-label small" for="servicio-modalidad">Modalidad</label>
+              <select
+                id="servicio-modalidad"
+                formControlName="modalidad"
+                class="form-select"
+                [class.is-invalid]="esInvalido('modalidad')"
+              >
+                @for (m of modalidades; track m.valor) {
+                  <option [value]="m.valor">{{ m.etiqueta }}</option>
+                }
+              </select>
+            </div>
+
+            @if (errorFormulario()) {
+              <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorFormulario() }}</div>
+            }
+          </div>
+
+          <div class="modal-footer border-0 pt-0">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              [disabled]="guardando()"
+              (click)="cerrarModal()"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-sm btn-accento" [disabled]="guardando()">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Guardando…
+              } @else {
+                <i class="bi bi-check2 me-1" aria-hidden="true"></i>
+                Guardar
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show servicio-modal__backdrop"></div>
+}

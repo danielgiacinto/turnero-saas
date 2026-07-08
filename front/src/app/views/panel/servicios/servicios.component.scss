@@ -1,0 +1,136 @@
+:host {
+  display: block;
+}
+
+.servicios-vacio__icono {
+  font-size: 2.5rem;
+  color: var(--color-texto-muted);
+}
+
+.servicio-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
+
+  &:hover {
+    border-color: var(--color-acento);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  &__cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  &__nombre {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  &__modalidad {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background-color: var(--estado-confirmado-fondo);
+    color: var(--estado-confirmado-texto);
+    font-size: 0.7rem;
+    font-weight: 600;
+
+    &--online {
+      background-color: var(--estado-pendiente-fondo);
+      color: var(--estado-pendiente-texto);
+    }
+  }
+
+  &__datos {
+    display: flex;
+    gap: 1rem;
+  }
+
+  &__dato {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  &__dato-etiqueta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-texto-muted);
+  }
+
+  &__dato-valor {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  &__acciones {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.servicio-modal {
+  z-index: 1060;
+
+  &__backdrop {
+    z-index: 1055;
+  }
+
+  &__contenido {
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto);
+  }
+
+  .modal-title {
+    color: var(--color-texto);
+  }
+
+  .btn-close {
+    filter: var(--bs-btn-close-white-filter, none);
+  }
+}
+
+.form-control,
+.form-select {
+  background-color: var(--color-superficie);
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+
+  &:focus {
+    background-color: var(--color-superficie);
+    border-color: var(--color-acento);
+    color: var(--color-texto);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--color-acento) 25%, transparent);
+  }
+}
+
+.input-group-text {
+  background-color: var(--color-fondo);
+  border-color: var(--color-borde);
+  color: var(--color-texto-muted);
+}

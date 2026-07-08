@@ -9,6 +9,7 @@ import { PanelConfiguracionComponent } from './configuracion/panel-configuracion
 import { ConfiguracionAparienciaComponent } from './configuracion/apariencia/apariencia.component';
 import { ConfiguracionDatosComercioComponent } from './configuracion/datos-comercio/datos-comercio.component';
 import { PanelProfesionalesComponent } from './profesionales/profesionales.component';
+import { PanelServiciosComponent } from './servicios/servicios.component';
 
 export const PANEL_ROUTES: Routes = [
   {
@@ -22,7 +23,7 @@ export const PANEL_ROUTES: Routes = [
         children: [
           { path: '', component: PanelInicioComponent },
           { path: 'clientes', component: PanelInicioComponent },
-          { path: 'servicios', component: PanelInicioComponent },
+          { path: 'servicios', component: PanelServiciosComponent },
           {
             path: 'profesionales',
             canActivate: [adminGuard],
