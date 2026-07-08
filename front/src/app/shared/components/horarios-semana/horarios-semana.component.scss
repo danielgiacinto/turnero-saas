@@ -1,0 +1,116 @@
+:host {
+  display: block;
+}
+
+.horarios-semana {
+  display: grid;
+  gap: 0.75rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  &__dia {
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    background-color: var(--color-fondo);
+    padding: 0.75rem 0.9rem;
+  }
+
+  &__dia-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  &__dia-nombre {
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  &__agregar {
+    color: var(--color-acento);
+    text-decoration: none;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  &__vacio {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-texto-muted);
+    font-style: italic;
+  }
+
+  &__franjas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  &__franja {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 8px;
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+  }
+
+  &__rango {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  &__acciones {
+    display: inline-flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+}
+
+.horario-modal {
+  z-index: 1060;
+
+  &__backdrop {
+    z-index: 1055;
+  }
+
+  &__contenido {
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto);
+  }
+
+  .modal-title {
+    color: var(--color-texto);
+  }
+
+  .btn-close {
+    filter: var(--bs-btn-close-white-filter, none);
+  }
+}
+
+.form-control,
+.form-select {
+  background-color: var(--color-superficie);
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+
+  &:focus {
+    background-color: var(--color-superficie);
+    border-color: var(--color-acento);
+    color: var(--color-texto);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--color-acento) 25%, transparent);
+  }
+}

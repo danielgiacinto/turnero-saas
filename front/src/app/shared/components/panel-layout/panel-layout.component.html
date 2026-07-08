@@ -30,8 +30,17 @@
         class="panel-comercio__nav-item"
         (click)="cerrarMenu()"
       >
-        <i class="bi bi-scissors" aria-hidden="true"></i>
+        <i class="bi" [class]="iconoServicio()" aria-hidden="true"></i>
         Servicios
+      </a>
+      <a
+        routerLink="/panel/horarios"
+        routerLinkActive="panel-comercio__nav-item--activo"
+        class="panel-comercio__nav-item"
+        (click)="cerrarMenu()"
+      >
+        <i class="bi bi-clock-history" aria-hidden="true"></i>
+        Horarios
       </a>
       @if (esAdmin()) {
         <a

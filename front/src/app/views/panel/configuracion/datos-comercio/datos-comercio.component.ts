@@ -141,6 +141,7 @@ export class ConfiguracionDatosComercioComponent implements OnInit {
           id: actualizado.id,
           nombre: actualizado.nombre,
           url: actualizado.url,
+          rubro: actualizado.rubro,
           estado_suscripcion: actualizado.estado_suscripcion,
           fecha_vencimiento: actualizado.fecha_vencimiento,
         });

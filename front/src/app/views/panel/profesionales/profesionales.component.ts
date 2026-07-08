@@ -7,6 +7,7 @@ import {
   ProfesionalListado,
 } from '../../../core/models/usuario.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { HorariosSemanaComponent } from '../../../shared/components/horarios-semana/horarios-semana.component';
 import {
   controlInvalido,
   mensajeValidacion,
@@ -22,7 +23,7 @@ interface ConfirmacionBorrado {
 
 @Component({
   selector: 'app-panel-profesionales',
-  imports: [ReactiveFormsModule, DatePipe],
+  imports: [ReactiveFormsModule, DatePipe, HorariosSemanaComponent],
   templateUrl: './profesionales.component.html',
   styleUrl: './profesionales.component.scss',
 })
@@ -44,6 +45,8 @@ export class PanelProfesionalesComponent implements OnInit {
   readonly borradoCargando = signal(false);
   readonly borradoError = signal<string | null>(null);
   readonly listadoExito = signal<string | null>(null);
+
+  readonly profesionalesExpandidos = signal<Set<string>>(new Set());
 
   readonly formularioInvitacion = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -105,6 +108,22 @@ export class PanelProfesionalesComponent implements OnInit {
         this.invitacionError.set(err?.error?.mensaje ?? 'No se pudo enviar la invitación.');
         this.invitacionCargando.set(false);
       },
+    });
+  }
+
+  estaExpandido(id: string): boolean {
+    return this.profesionalesExpandidos().has(id);
+  }
+
+  alternarHorarios(id: string): void {
+    this.profesionalesExpandidos.update((actual) => {
+      const copia = new Set(actual);
+      if (copia.has(id)) {
+        copia.delete(id);
+      } else {
+        copia.add(id);
+      }
+      return copia;
     });
   }
 

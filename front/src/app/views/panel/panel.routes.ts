@@ -10,6 +10,7 @@ import { ConfiguracionAparienciaComponent } from './configuracion/apariencia/apa
 import { ConfiguracionDatosComercioComponent } from './configuracion/datos-comercio/datos-comercio.component';
 import { PanelProfesionalesComponent } from './profesionales/profesionales.component';
 import { PanelServiciosComponent } from './servicios/servicios.component';
+import { PanelHorariosComponent } from './horarios/horarios.component';
 
 export const PANEL_ROUTES: Routes = [
   {
@@ -24,6 +25,7 @@ export const PANEL_ROUTES: Routes = [
           { path: '', component: PanelInicioComponent },
           { path: 'clientes', component: PanelInicioComponent },
           { path: 'servicios', component: PanelServiciosComponent },
+          { path: 'horarios', component: PanelHorariosComponent },
           {
             path: 'profesionales',
             canActivate: [adminGuard],

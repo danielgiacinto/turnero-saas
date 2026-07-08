@@ -1,0 +1,237 @@
+@if (cargando()) {
+  <p class="small text-muted mb-0">
+    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    Cargando horarios…
+  </p>
+} @else if (error()) {
+  <div class="alert alert-danger py-2 small mb-0">{{ error() }}</div>
+} @else {
+  @if (editable()) {
+    <div class="d-flex justify-content-end mb-3">
+      <button type="button" class="btn btn-accento btn-sm" (click)="abrirCreacion()">
+        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+        Agregar horario
+      </button>
+    </div>
+  }
+
+  @if (!hayHorarios() && !editable()) {
+    <p class="small text-muted mb-0">
+      <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+      Este profesional todavía no cargó horarios de atención.
+    </p>
+  } @else {
+    <div class="horarios-semana">
+      @for (dia of diasConHorarios(); track dia.valor) {
+        <div class="horarios-semana__dia">
+          <div class="horarios-semana__dia-cabecera">
+            <span class="horarios-semana__dia-nombre">{{ dia.etiqueta }}</span>
+            @if (editable()) {
+              <button
+                type="button"
+                class="btn btn-link btn-sm p-0 horarios-semana__agregar"
+                (click)="abrirCreacion(dia.valor)"
+              >
+                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
+
+          @if (dia.horarios.length === 0) {
+            <p class="horarios-semana__vacio">Sin franjas</p>
+          } @else {
+            <ul class="horarios-semana__franjas">
+              @for (h of dia.horarios; track h.id) {
+                <li class="horarios-semana__franja">
+                  <span class="horarios-semana__rango">
+                    <i class="bi bi-clock me-1" aria-hidden="true"></i>
+                    {{ h.hora_inicio }} – {{ h.hora_fin }}
+                  </span>
+                  @if (editable()) {
+                    <span class="horarios-semana__acciones">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        title="Editar franja"
+                        (click)="abrirEdicion(h)"
+                      >
+                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        title="Eliminar franja"
+                        (click)="abrirConfirmacionBorrado(h)"
+                      >
+                        <i class="bi bi-trash" aria-hidden="true"></i>
+                      </button>
+                    </span>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    </div>
+  }
+}
+
+@if (modalAbierto()) {
+  <div
+    class="modal fade show d-block horario-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-horario-titulo"
+    (click)="cerrarModal()"
+  >
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content horario-modal__contenido">
+        <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+          <div class="modal-header border-0 pb-0">
+            <h2 id="modal-horario-titulo" class="modal-title h6 d-flex align-items-center gap-2">
+              <i class="bi bi-clock-history" aria-hidden="true"></i>
+              {{ tituloModal() }}
+            </h2>
+            <button
+              type="button"
+              class="btn-close"
+              aria-label="Cerrar"
+              [disabled]="guardando()"
+              (click)="cerrarModal()"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label small" for="horario-dia">Día</label>
+              <select
+                id="horario-dia"
+                formControlName="dia_semana"
+                class="form-select"
+                [class.is-invalid]="esInvalido('dia_semana')"
+              >
+                @for (d of dias; track d.valor) {
+                  <option [value]="d.valor">{{ d.etiqueta }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label small" for="horario-inicio">Desde</label>
+                <input
+                  id="horario-inicio"
+                  type="time"
+                  formControlName="hora_inicio"
+                  class="form-control"
+                  [class.is-invalid]="esInvalido('hora_inicio')"
+                />
+                @if (esInvalido('hora_inicio')) {
+                  <div class="invalid-feedback d-block">{{ mensaje('hora_inicio', 'La hora de inicio') }}</div>
+                }
+              </div>
+              <div class="col-6">
+                <label class="form-label small" for="horario-fin">Hasta</label>
+                <input
+                  id="horario-fin"
+                  type="time"
+                  formControlName="hora_fin"
+                  class="form-control"
+                  [class.is-invalid]="esInvalido('hora_fin')"
+                />
+                @if (esInvalido('hora_fin')) {
+                  <div class="invalid-feedback d-block">{{ mensaje('hora_fin', 'La hora de fin') }}</div>
+                }
+              </div>
+            </div>
+
+            @if (errorFormulario()) {
+              <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorFormulario() }}</div>
+            }
+          </div>
+
+          <div class="modal-footer border-0 pt-0">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              [disabled]="guardando()"
+              (click)="cerrarModal()"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-sm btn-accento" [disabled]="guardando()">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Guardando…
+              } @else {
+                <i class="bi bi-check2 me-1" aria-hidden="true"></i>
+                Guardar
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show horario-modal__backdrop"></div>
+}
+
+@if (confirmacionBorrado(); as h) {
+  <div
+    class="modal fade show d-block horario-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-borrado-horario-titulo"
+    (click)="cerrarConfirmacionBorrado()"
+  >
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content horario-modal__contenido">
+        <div class="modal-header border-0 pb-0">
+          <h2 id="modal-borrado-horario-titulo" class="modal-title h6 d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill text-warning" aria-hidden="true"></i>
+            Eliminar horario
+          </h2>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Cerrar"
+            [disabled]="borrando()"
+            (click)="cerrarConfirmacionBorrado()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0 small">
+            ¿Eliminar la franja <strong>{{ h.hora_inicio }} – {{ h.hora_fin }}</strong>?
+          </p>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            [disabled]="borrando()"
+            (click)="cerrarConfirmacionBorrado()"
+          >
+            No, volver
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-danger"
+            [disabled]="borrando()"
+            (click)="confirmarBorrado()"
+          >
+            @if (borrando()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              Eliminando…
+            } @else {
+              Sí, eliminar
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show horario-modal__backdrop"></div>
+}

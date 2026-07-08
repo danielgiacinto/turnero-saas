@@ -39,6 +39,7 @@ export interface ComercioPublico {
   id: string;
   nombre: string;
   url: string;
+  rubro: Comercio['rubro'];
   estado_suscripcion: Comercio['estado_suscripcion'];
   fecha_vencimiento: Date;
 }
@@ -82,6 +83,7 @@ function aComercioPublico(comercio: Comercio | null): ComercioPublico | null {
     id: comercio.id,
     nombre: comercio.nombre,
     url: comercio.url,
+    rubro: comercio.rubro,
     estado_suscripcion: comercio.estado_suscripcion,
     fecha_vencimiento: comercio.fecha_vencimiento,
   };

@@ -1,7 +1,7 @@
 <header class="mb-4 d-flex flex-wrap justify-content-between align-items-start gap-2">
   <div>
     <h1 class="h4 mb-1 d-flex align-items-center gap-2">
-      <i class="bi bi-scissors text-muted" aria-hidden="true"></i>
+      <i class="bi text-muted" [class]="iconoRubro()" aria-hidden="true"></i>
       Servicios
     </h1>
     <p class="text-muted small mb-0">
@@ -36,7 +36,7 @@
   <div class="alert alert-danger py-2 small mb-0">{{ error() }}</div>
 } @else if (servicios().length === 0) {
   <div class="panel-comercio__tarjeta text-center py-5">
-    <i class="bi bi-scissors servicios-vacio__icono" aria-hidden="true"></i>
+    <i class="bi servicios-vacio__icono" [class]="iconoRubro()" aria-hidden="true"></i>
     <p class="text-muted small mb-3 mt-2">
       Todavía no hay servicios cargados.
       @if (esAdmin()) {
@@ -117,7 +117,7 @@
         <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
           <div class="modal-header border-0 pb-0">
             <h2 id="modal-servicio-titulo" class="modal-title h6 d-flex align-items-center gap-2">
-              <i class="bi bi-scissors" aria-hidden="true"></i>
+              <i class="bi" [class]="iconoRubro()" aria-hidden="true"></i>
               {{ tituloModal() }}
             </h2>
             <button

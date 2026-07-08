@@ -9,6 +9,7 @@ import {
 } from '../../../core/models/servicio.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { ServicioService } from '../../../core/services/servicio.service';
+import { iconoServicioPorRubro } from '../../../core/utils/rubro.util';
 import {
   controlInvalido,
   mensajeValidacion,
@@ -29,6 +30,7 @@ export class PanelServiciosComponent implements OnInit {
 
   readonly modalidades = MODALIDADES_SERVICIO;
   readonly esAdmin = computed(() => this.auth.usuario()?.rol === 'admin');
+  readonly iconoRubro = computed(() => iconoServicioPorRubro(this.auth.comercio()?.rubro));
 
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);

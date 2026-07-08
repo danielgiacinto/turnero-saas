@@ -1,3 +1,5 @@
+import { TipoRubro } from './comercio.model';
+
 export type RolUsuario = 'super_admin' | 'admin' | 'profesional';
 
 export interface UsuarioSesion {
@@ -12,6 +14,7 @@ export interface ComercioSesion {
   id: string;
   nombre: string;
   url: string;
+  rubro: TipoRubro;
   estado_suscripcion: 'pendiente' | 'activa' | 'suspendida' | 'cancelada';
   fecha_vencimiento: string;
 }

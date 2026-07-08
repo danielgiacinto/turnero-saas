@@ -18,6 +18,7 @@ import {
   claseBadgeSuscripcion,
   etiquetaEstadoSuscripcion,
 } from '../../../core/utils/suscripcion.util';
+import { iconoServicioPorRubro } from '../../../core/utils/rubro.util';
 
 /**
  * Shell del panel admin/profesional.
@@ -41,6 +42,7 @@ export class PanelLayoutComponent implements AfterViewInit {
   readonly usuario = this.auth.usuario;
   readonly comercio = this.auth.comercio;
   readonly esAdmin = computed(() => this.auth.usuario()?.rol === 'admin');
+  readonly iconoServicio = computed(() => iconoServicioPorRubro(this.auth.comercio()?.rubro));
   readonly menuAbierto = signal(false);
 
   readonly etiquetaEstadoSuscripcion = etiquetaEstadoSuscripcion;
