@@ -2,6 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { EstadoTurno } from '../../core/models/turno.model';
 
 const ETIQUETAS_ESTADO: Record<EstadoTurno, string> = {
+  pendiente_verificacion: 'Por verificar',
   pendiente: 'Pendiente',
   completo: 'Completo',
   cancelado: 'Cancelado',

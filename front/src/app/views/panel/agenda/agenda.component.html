@@ -1,0 +1,406 @@
+<header class="mb-4 d-flex flex-wrap justify-content-between align-items-start gap-2">
+  <div>
+    <h1 class="h4 mb-1 d-flex align-items-center gap-2">
+      <i class="bi bi-calendar3 text-muted" aria-hidden="true"></i>
+      Agenda
+    </h1>
+    <p class="text-muted small mb-0">Gestioná los turnos del día y agendá nuevos clientes.</p>
+  </div>
+  <button type="button" class="btn btn-accento btn-sm" (click)="abrirNuevoTurno()">
+    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+    Nuevo turno
+  </button>
+</header>
+
+<section class="panel-comercio__tarjeta mb-4">
+  <div class="row g-3">
+    @if (esAdmin()) {
+      <div class="col-12 col-md-6">
+        <label class="form-label small" for="agenda-profesional">Profesional</label>
+        <select
+          id="agenda-profesional"
+          class="form-select"
+          [ngModel]="profesionalSeleccionado()"
+          (ngModelChange)="cambiarProfesional($event)"
+        >
+          @for (s of staff(); track s.id) {
+            <option [value]="s.id">{{ s.nombre }}{{ s.rol === 'admin' ? ' (yo)' : '' }}</option>
+          }
+        </select>
+      </div>
+    }
+    <div class="col-12" [class.col-md-6]="esAdmin()">
+      <label class="form-label small" for="agenda-fecha">Fecha</label>
+      <input
+        id="agenda-fecha"
+        type="date"
+        class="form-control"
+        [ngModel]="fechaSeleccionada()"
+        (ngModelChange)="cambiarFecha($event)"
+      />
+    </div>
+  </div>
+</section>
+
+@if (exito()) {
+  <div class="alert alert-success py-2 small mb-3 d-flex align-items-start gap-2">
+    <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+    <span>{{ exito() }}</span>
+  </div>
+}
+
+@if (cargando()) {
+  <p class="small text-muted mb-0">
+    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    Cargando agenda…
+  </p>
+} @else if (error()) {
+  <div class="alert alert-danger py-2 small mb-0">{{ error() }}</div>
+} @else if (turnosActivos().length === 0 && turnosCancelados().length === 0) {
+  <div class="panel-comercio__tarjeta text-center py-5">
+    <i class="bi bi-calendar-x agenda-vacia__icono" aria-hidden="true"></i>
+    <p class="text-muted small mb-3 mt-2">No hay turnos agendados para este día.</p>
+    <button type="button" class="btn btn-accento btn-sm" (click)="abrirNuevoTurno()">
+      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+      Nuevo turno
+    </button>
+  </div>
+} @else {
+  <div class="agenda-turnos">
+    @for (t of turnosActivos(); track t.id) {
+      <article class="agenda-turno">
+        <div class="agenda-turno__hora">
+          <span class="agenda-turno__hora-valor">{{ t.fecha_hora | date: 'HH:mm' }}</span>
+          <span class="agenda-turno__duracion">{{ t.duracion_minutos }} min</span>
+        </div>
+        <div class="agenda-turno__detalle">
+          <p class="agenda-turno__cliente">
+            {{ t.cliente.nombre }} {{ t.cliente.apellido }}
+          </p>
+          <p class="agenda-turno__servicio">
+            {{ t.servicio.nombre }}
+            <span class="text-muted">· {{ t.cliente.telefono }}</span>
+          </p>
+        </div>
+        <div class="agenda-turno__estado">
+          <span [class]="claseBadgeTurno(t.estado)">{{ etiquetasEstado[t.estado] }}</span>
+          @if (puedeCancelar(t.estado)) {
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-danger"
+              title="Cancelar turno"
+              (click)="abrirCancelacion(t)"
+            >
+              <i class="bi bi-x-circle" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+      </article>
+    }
+
+    @if (turnosCancelados().length > 0) {
+      <details class="agenda-cancelados">
+        <summary class="small text-muted">
+          Turnos cancelados ({{ turnosCancelados().length }})
+        </summary>
+        @for (t of turnosCancelados(); track t.id) {
+          <article class="agenda-turno agenda-turno--cancelado">
+            <div class="agenda-turno__hora">
+              <span class="agenda-turno__hora-valor">{{ t.fecha_hora | date: 'HH:mm' }}</span>
+            </div>
+            <div class="agenda-turno__detalle">
+              <p class="agenda-turno__cliente">{{ t.cliente.nombre }} {{ t.cliente.apellido }}</p>
+              <p class="agenda-turno__servicio">{{ t.servicio.nombre }}</p>
+            </div>
+            <div class="agenda-turno__estado">
+              <span [class]="claseBadgeTurno(t.estado)">{{ etiquetasEstado[t.estado] }}</span>
+            </div>
+          </article>
+        }
+      </details>
+    }
+  </div>
+}
+
+<!-- Modal nuevo turno -->
+@if (modalAbierto()) {
+  <div
+    class="modal fade show d-block agenda-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-turno-titulo"
+    (click)="cerrarModal()"
+  >
+    <div
+      class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg"
+      role="document"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-content agenda-modal__contenido">
+        <div class="modal-header border-0 pb-0">
+          <h2 id="modal-turno-titulo" class="modal-title h6 d-flex align-items-center gap-2">
+            <i class="bi bi-calendar-plus" aria-hidden="true"></i>
+            Nuevo turno
+          </h2>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Cerrar"
+            [disabled]="guardando()"
+            (click)="cerrarModal()"
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Paso 1: servicio + fecha -->
+          <h3 class="agenda-modal__paso">1. Servicio y fecha</h3>
+          <form [formGroup]="formularioTurno" novalidate>
+            <div class="row g-3">
+              <div class="col-12 col-md-7">
+                <label class="form-label small" for="turno-servicio">Servicio</label>
+                <select
+                  id="turno-servicio"
+                  formControlName="servicio_id"
+                  class="form-select"
+                  (change)="consultarDisponibilidad()"
+                >
+                  <option value="" disabled>Elegí un servicio…</option>
+                  @for (s of servicios(); track s.id) {
+                    <option [value]="s.id">{{ s.nombre }} ({{ s.duracion_minutos }} min)</option>
+                  }
+                </select>
+              </div>
+              <div class="col-12 col-md-5">
+                <label class="form-label small" for="turno-fecha">Fecha</label>
+                <input
+                  id="turno-fecha"
+                  type="date"
+                  formControlName="fecha"
+                  class="form-control"
+                  (change)="consultarDisponibilidad()"
+                />
+              </div>
+            </div>
+          </form>
+
+          <!-- Paso 2: horario -->
+          <h3 class="agenda-modal__paso mt-4">2. Horario disponible</h3>
+          @if (cargandoSlots()) {
+            <p class="small text-muted mb-0">
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              Buscando horarios…
+            </p>
+          } @else if (slots().length === 0) {
+            <p class="small text-muted mb-0">
+              <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+              @if (formularioTurno.get('servicio_id')?.value) {
+                No hay horarios disponibles para ese día. Probá con otra fecha.
+              } @else {
+                Elegí un servicio y una fecha para ver los horarios.
+              }
+            </p>
+          } @else {
+            <div class="agenda-slots">
+              @for (slot of slots(); track slot.hora) {
+                <button
+                  type="button"
+                  class="agenda-slots__slot"
+                  [class.agenda-slots__slot--activo]="slotSeleccionado() === slot.hora"
+                  (click)="seleccionarSlot(slot.hora)"
+                >
+                  {{ slot.hora }}
+                </button>
+              }
+            </div>
+          }
+
+          <!-- Paso 3: cliente -->
+          <h3 class="agenda-modal__paso mt-4">3. Cliente</h3>
+          <form [formGroup]="formularioCliente" novalidate>
+            <label class="form-label small" for="cliente-email">Email del cliente</label>
+            <div class="input-group mb-1">
+              <input
+                id="cliente-email"
+                type="email"
+                formControlName="email"
+                class="form-control"
+                [class.is-invalid]="esInvalidoCliente('email')"
+                placeholder="cliente@ejemplo.com"
+                autocomplete="off"
+                (blur)="buscarCliente()"
+              />
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                [disabled]="buscandoCliente()"
+                (click)="buscarCliente()"
+              >
+                @if (buscandoCliente()) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else {
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                }
+              </button>
+            </div>
+            @if (esInvalidoCliente('email')) {
+              <div class="invalid-feedback d-block mb-2">{{ mensajeCliente('email', 'El email') }}</div>
+            }
+
+            @if (busquedaRealizada()) {
+              @if (clienteEncontrado(); as cliente) {
+                <div class="alert alert-success py-2 small mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-person-check-fill flex-shrink-0" aria-hidden="true"></i>
+                  <span>
+                    Cliente existente: <strong>{{ cliente.nombre }} {{ cliente.apellido }}</strong>
+                    ({{ cliente.telefono }}). Se usará su registro.
+                  </span>
+                </div>
+              } @else {
+                <div class="alert alert-info py-2 small mb-3 d-flex align-items-start gap-2">
+                  <i class="bi bi-person-plus-fill flex-shrink-0" aria-hidden="true"></i>
+                  <span>Cliente nuevo: completá sus datos para registrarlo.</span>
+                </div>
+              }
+            }
+
+            @if (!clienteEncontrado()) {
+              <div class="row g-3">
+                <div class="col-12 col-md-4">
+                  <label class="form-label small" for="cliente-nombre">Nombre</label>
+                  <input
+                    id="cliente-nombre"
+                    type="text"
+                    formControlName="nombre"
+                    class="form-control"
+                    [class.is-invalid]="esInvalidoCliente('nombre')"
+                  />
+                  @if (esInvalidoCliente('nombre')) {
+                    <div class="invalid-feedback d-block">{{ mensajeCliente('nombre', 'El nombre') }}</div>
+                  }
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small" for="cliente-apellido">Apellido</label>
+                  <input
+                    id="cliente-apellido"
+                    type="text"
+                    formControlName="apellido"
+                    class="form-control"
+                    [class.is-invalid]="esInvalidoCliente('apellido')"
+                  />
+                  @if (esInvalidoCliente('apellido')) {
+                    <div class="invalid-feedback d-block">
+                      {{ mensajeCliente('apellido', 'El apellido') }}
+                    </div>
+                  }
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small" for="cliente-telefono">Teléfono</label>
+                  <input
+                    id="cliente-telefono"
+                    type="tel"
+                    formControlName="telefono"
+                    class="form-control"
+                    [class.is-invalid]="esInvalidoCliente('telefono')"
+                    placeholder="11 5555-5555"
+                  />
+                  @if (esInvalidoCliente('telefono')) {
+                    <div class="invalid-feedback d-block">
+                      {{ mensajeCliente('telefono', 'El teléfono') }}
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </form>
+
+          @if (errorFormulario()) {
+            <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorFormulario() }}</div>
+          }
+        </div>
+
+        <div class="modal-footer border-0 pt-0">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            [disabled]="guardando()"
+            (click)="cerrarModal()"
+          >
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-sm btn-accento" [disabled]="guardando()" (click)="guardarTurno()">
+            @if (guardando()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              Agendando…
+            } @else {
+              <i class="bi bi-check2 me-1" aria-hidden="true"></i>
+              Agendar turno
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show agenda-modal__backdrop"></div>
+}
+
+<!-- Modal cancelar turno -->
+@if (turnoACancelar(); as turno) {
+  <div
+    class="modal fade show d-block agenda-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-cancelar-titulo"
+    (click)="cerrarCancelacion()"
+  >
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content agenda-modal__contenido">
+        <div class="modal-header border-0 pb-0">
+          <h2 id="modal-cancelar-titulo" class="modal-title h6 d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill text-warning" aria-hidden="true"></i>
+            Cancelar turno
+          </h2>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Cerrar"
+            [disabled]="cancelando()"
+            (click)="cerrarCancelacion()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0 small">
+            ¿Cancelar el turno de
+            <strong>{{ turno.cliente.nombre }} {{ turno.cliente.apellido }}</strong> a las
+            <strong>{{ turno.fecha_hora | date: 'HH:mm' }}</strong> ({{ turno.servicio.nombre }})?
+          </p>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            [disabled]="cancelando()"
+            (click)="cerrarCancelacion()"
+          >
+            No, volver
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-danger"
+            [disabled]="cancelando()"
+            (click)="confirmarCancelacion()"
+          >
+            @if (cancelando()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              Cancelando…
+            } @else {
+              Sí, cancelar
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show agenda-modal__backdrop"></div>
+}

@@ -1,0 +1,156 @@
+:host {
+  display: block;
+}
+
+.agenda-vacia__icono {
+  font-size: 2.5rem;
+  color: var(--color-texto-muted);
+}
+
+.agenda-turnos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.agenda-turno {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  background-color: var(--color-superficie);
+
+  &--cancelado {
+    opacity: 0.6;
+    margin-top: 0.6rem;
+  }
+
+  &__hora {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    min-width: 4rem;
+    padding-right: 1rem;
+    border-right: 1px solid var(--color-borde);
+  }
+
+  &__hora-valor {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-acento);
+  }
+
+  &__duracion {
+    font-size: 0.7rem;
+    color: var(--color-texto-muted);
+  }
+
+  &__detalle {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  &__cliente {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  &__servicio {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-texto-muted);
+  }
+
+  &__estado {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+}
+
+.agenda-cancelados {
+  summary {
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+}
+
+.agenda-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  &__slot {
+    padding: 0.35rem 0.8rem;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      border-color 0.1s ease,
+      background-color 0.1s ease;
+
+    &:hover {
+      border-color: var(--color-acento);
+    }
+
+    &--activo {
+      background-color: var(--color-acento);
+      border-color: var(--color-acento);
+      color: var(--color-fondo);
+    }
+  }
+}
+
+.agenda-modal {
+  z-index: 1060;
+
+  &__backdrop {
+    z-index: 1055;
+  }
+
+  &__contenido {
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto);
+  }
+
+  &__paso {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-texto-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .modal-title {
+    color: var(--color-texto);
+  }
+
+  .btn-close {
+    filter: var(--bs-btn-close-white-filter, none);
+  }
+}
+
+.form-control,
+.form-select {
+  background-color: var(--color-superficie);
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+
+  &:focus {
+    background-color: var(--color-superficie);
+    border-color: var(--color-acento);
+    color: var(--color-texto);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--color-acento) 25%, transparent);
+  }
+}

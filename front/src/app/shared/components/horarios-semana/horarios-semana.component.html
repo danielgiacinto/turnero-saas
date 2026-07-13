@@ -121,26 +121,32 @@
             <div class="row g-3">
               <div class="col-6">
                 <label class="form-label small" for="horario-inicio">Desde</label>
-                <input
+                <select
                   id="horario-inicio"
-                  type="time"
                   formControlName="hora_inicio"
-                  class="form-control"
+                  class="form-select"
                   [class.is-invalid]="esInvalido('hora_inicio')"
-                />
+                >
+                  @for (hora of opcionesHora; track hora) {
+                    <option [value]="hora">{{ hora }} hs</option>
+                  }
+                </select>
                 @if (esInvalido('hora_inicio')) {
                   <div class="invalid-feedback d-block">{{ mensaje('hora_inicio', 'La hora de inicio') }}</div>
                 }
               </div>
               <div class="col-6">
                 <label class="form-label small" for="horario-fin">Hasta</label>
-                <input
+                <select
                   id="horario-fin"
-                  type="time"
                   formControlName="hora_fin"
-                  class="form-control"
+                  class="form-select"
                   [class.is-invalid]="esInvalido('hora_fin')"
-                />
+                >
+                  @for (hora of opcionesHora; track hora) {
+                    <option [value]="hora">{{ hora }} hs</option>
+                  }
+                </select>
                 @if (esInvalido('hora_fin')) {
                   <div class="invalid-feedback d-block">{{ mensaje('hora_fin', 'La hora de fin') }}</div>
                 }

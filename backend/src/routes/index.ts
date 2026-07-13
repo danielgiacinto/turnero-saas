@@ -3,6 +3,7 @@ import { authRoutes } from './auth.routes';
 import { comercioRoutes } from './comercio.routes';
 import { servicioRoutes } from './servicio.routes';
 import { horarioRoutes } from './horario.routes';
+import { clienteRoutes } from './cliente.routes';
 import { saludRoutes } from './salud.routes';
 import { turnoRoutes } from './turno.routes';
 
@@ -13,4 +14,5 @@ routes.use('/auth', authRoutes);
 routes.use('/comercio', comercioRoutes);
 routes.use('/servicios', servicioRoutes);
 routes.use('/horarios', horarioRoutes);
+routes.use('/clientes', clienteRoutes);
 routes.use('/turnos', turnoRoutes);

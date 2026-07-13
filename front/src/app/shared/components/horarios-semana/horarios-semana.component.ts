@@ -20,6 +20,17 @@ interface DiaConHorarios {
 
 type CampoHorario = 'dia_semana' | 'hora_inicio' | 'hora_fin';
 
+/** Opciones de hora en formato 24 hs cada 30 minutos, para evitar ambigüedad a.m./p.m. */
+function generarOpcionesHora(): string[] {
+  const opciones: string[] = [];
+  for (let minutos = 0; minutos < 24 * 60; minutos += 30) {
+    const hh = String(Math.floor(minutos / 60)).padStart(2, '0');
+    const mm = String(minutos % 60).padStart(2, '0');
+    opciones.push(`${hh}:${mm}`);
+  }
+  return opciones;
+}
+
 @Component({
   selector: 'app-horarios-semana',
   imports: [ReactiveFormsModule],
@@ -35,6 +46,7 @@ export class HorariosSemanaComponent {
   readonly editable = input(true);
 
   readonly dias = DIAS_SEMANA;
+  readonly opcionesHora = generarOpcionesHora();
 
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);

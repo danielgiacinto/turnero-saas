@@ -11,6 +11,7 @@ import { ConfiguracionDatosComercioComponent } from './configuracion/datos-comer
 import { PanelProfesionalesComponent } from './profesionales/profesionales.component';
 import { PanelServiciosComponent } from './servicios/servicios.component';
 import { PanelHorariosComponent } from './horarios/horarios.component';
+import { PanelAgendaComponent } from './agenda/agenda.component';
 
 export const PANEL_ROUTES: Routes = [
   {
@@ -22,7 +23,7 @@ export const PANEL_ROUTES: Routes = [
         path: '',
         canActivate: [suscripcionGuard],
         children: [
-          { path: '', component: PanelInicioComponent },
+          { path: '', component: PanelAgendaComponent },
           { path: 'clientes', component: PanelInicioComponent },
           { path: 'servicios', component: PanelServiciosComponent },
           { path: 'horarios', component: PanelHorariosComponent },
