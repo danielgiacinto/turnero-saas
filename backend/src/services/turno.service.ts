@@ -145,10 +145,30 @@ export const turnoService = {
     ctx: ContextoSolicitante,
     params: { profesionalId?: string; fecha: string },
   ): Promise<TurnoListado[]> {
+    return this.listarRango(ctx, {
+      profesionalId: params.profesionalId,
+      desde: params.fecha,
+      hasta: params.fecha,
+    });
+  },
+
+  async listarRango(
+    ctx: ContextoSolicitante,
+    params: { profesionalId?: string; desde: string; hasta: string },
+  ): Promise<TurnoListado[]> {
     const profesionalId = resolverProfesionalObjetivo(ctx, params.profesionalId);
     await asegurarProfesionalDelComercio(ctx, profesionalId);
 
-    const { desde, hasta } = rangoDelDia(params.fecha);
+    const { desde } = rangoDelDia(params.desde);
+    const { hasta } = rangoDelDia(params.hasta);
+
+    if (hasta <= desde) {
+      throw new ErrorValidacion('El rango de fechas no es válido.');
+    }
+    const DIAS_MAXIMOS = 31;
+    if (hasta.getTime() - desde.getTime() > DIAS_MAXIMOS * 24 * 60 * 60 * 1000) {
+      throw new ErrorValidacion(`El rango no puede superar los ${DIAS_MAXIMOS} días.`);
+    }
 
     const turnos = await prisma.turno.findMany({
       where: {

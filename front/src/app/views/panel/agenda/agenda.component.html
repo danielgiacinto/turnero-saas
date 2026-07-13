@@ -13,32 +13,77 @@
 </header>
 
 <section class="panel-comercio__tarjeta mb-4">
-  <div class="row g-3">
+  <div class="agenda-filtros">
+    <div class="btn-group agenda-filtros__vista" role="group" aria-label="Vista de agenda">
+      <button
+        type="button"
+        class="btn btn-sm"
+        [class.btn-accento]="vista() === 'semana'"
+        [class.btn-outline-secondary]="vista() !== 'semana'"
+        (click)="cambiarVista('semana')"
+      >
+        <i class="bi bi-calendar-week me-1" aria-hidden="true"></i>
+        Semana
+      </button>
+      <button
+        type="button"
+        class="btn btn-sm"
+        [class.btn-accento]="vista() === 'dia'"
+        [class.btn-outline-secondary]="vista() !== 'dia'"
+        (click)="cambiarVista('dia')"
+      >
+        <i class="bi bi-calendar-day me-1" aria-hidden="true"></i>
+        Día
+      </button>
+    </div>
+
     @if (esAdmin()) {
-      <div class="col-12 col-md-6">
-        <label class="form-label small" for="agenda-profesional">Profesional</label>
-        <select
-          id="agenda-profesional"
-          class="form-select"
-          [ngModel]="profesionalSeleccionado()"
-          (ngModelChange)="cambiarProfesional($event)"
-        >
-          @for (s of staff(); track s.id) {
-            <option [value]="s.id">{{ s.nombre }}{{ s.rol === 'admin' ? ' (yo)' : '' }}</option>
-          }
-        </select>
-      </div>
+      <select
+        id="agenda-profesional"
+        class="form-select form-select-sm agenda-filtros__profesional"
+        aria-label="Profesional"
+        [ngModel]="profesionalSeleccionado()"
+        (ngModelChange)="cambiarProfesional($event)"
+      >
+        @for (s of staff(); track s.id) {
+          <option [value]="s.id">{{ s.nombre }}{{ s.rol === 'admin' ? ' (yo)' : '' }}</option>
+        }
+      </select>
     }
-    <div class="col-12" [class.col-md-6]="esAdmin()">
-      <label class="form-label small" for="agenda-fecha">Fecha</label>
+
+    @if (vista() === 'semana') {
+      <div class="agenda-filtros__nav">
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary"
+          aria-label="Semana anterior"
+          (click)="moverSemana(-1)"
+        >
+          <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="irASemanaActual()">
+          Hoy
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary"
+          aria-label="Semana siguiente"
+          (click)="moverSemana(1)"
+        >
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </button>
+        <span class="agenda-filtros__etiqueta small text-muted">{{ etiquetaSemana() }}</span>
+      </div>
+    } @else {
       <input
         id="agenda-fecha"
         type="date"
-        class="form-control"
+        class="form-control form-control-sm agenda-filtros__fecha"
+        aria-label="Fecha"
         [ngModel]="fechaSeleccionada()"
         (ngModelChange)="cambiarFecha($event)"
       />
-    </div>
+    }
   </div>
 </section>
 
@@ -56,6 +101,52 @@
   </p>
 } @else if (error()) {
   <div class="alert alert-danger py-2 small mb-0">{{ error() }}</div>
+} @else if (vista() === 'semana') {
+  <div class="agenda-semana">
+    @for (dia of diasSemanaVista(); track dia.fecha) {
+      <section class="agenda-semana__dia" [class.agenda-semana__dia--hoy]="dia.esHoy">
+        <button
+          type="button"
+          class="agenda-semana__cabecera"
+          [attr.title]="'Ver el día ' + dia.etiqueta + ' ' + dia.numero"
+          (click)="verDia(dia.fecha)"
+        >
+          <span class="agenda-semana__dia-nombre">{{ dia.etiqueta }}</span>
+          <span class="agenda-semana__dia-numero">{{ dia.numero }}</span>
+        </button>
+
+        <div class="agenda-semana__turnos">
+          @if (dia.turnos.length === 0) {
+            <p class="agenda-semana__vacio">Sin turnos</p>
+          } @else {
+            @for (t of dia.turnos; track t.id) {
+              <article class="agenda-semana__turno">
+                <div class="agenda-semana__turno-cabecera">
+                  <span class="agenda-semana__turno-hora">{{ t.fecha_hora | date: 'HH:mm' }}</span>
+                  @if (puedeCancelar(t.estado)) {
+                    <button
+                      type="button"
+                      class="agenda-semana__turno-cancelar"
+                      title="Cancelar turno"
+                      (click)="abrirCancelacion(t)"
+                    >
+                      <i class="bi bi-x-lg" aria-hidden="true"></i>
+                    </button>
+                  }
+                </div>
+                <p class="agenda-semana__turno-cliente">
+                  {{ t.cliente.nombre }} {{ t.cliente.apellido }}
+                </p>
+                <p class="agenda-semana__turno-servicio">
+                  {{ t.servicio.nombre }} · {{ t.duracion_minutos }} min
+                </p>
+              </article>
+            }
+          }
+        </div>
+      </section>
+    }
+  </div>
 } @else if (turnosActivos().length === 0 && turnosCancelados().length === 0) {
   <div class="panel-comercio__tarjeta text-center py-5">
     <i class="bi bi-calendar-x agenda-vacia__icono" aria-hidden="true"></i>

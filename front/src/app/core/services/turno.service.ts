@@ -35,6 +35,16 @@ export class TurnoService {
       .pipe(map((res) => res.datos));
   }
 
+  listarRango(desde: string, hasta: string, profesionalId?: string): Observable<TurnoListado[]> {
+    let params = new HttpParams().set('desde', desde).set('hasta', hasta);
+    if (profesionalId) {
+      params = params.set('profesional_id', profesionalId);
+    }
+    return this.http
+      .get<RespuestaApi<TurnoListado[]>>(this.baseUrl, { params })
+      .pipe(map((res) => res.datos));
+  }
+
   disponibilidad(
     servicioId: string,
     fecha: string,

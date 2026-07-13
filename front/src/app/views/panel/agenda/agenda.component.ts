@@ -22,13 +22,49 @@ import {
 } from '../../../shared/utils/validacion-formulario.util';
 
 type CampoCliente = 'email' | 'nombre' | 'apellido' | 'telefono';
+type VistaAgenda = 'semana' | 'dia';
+
+interface DiaSemanaVista {
+  fecha: string;
+  etiqueta: string;
+  numero: number;
+  esHoy: boolean;
+  turnos: TurnoListado[];
+}
+
+const ETIQUETAS_DIA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+/** Offsets desde el lunes de los días visibles en la vista semanal (a futuro configurable por usuario). */
+const OFFSETS_DIAS_VISIBLES = [0, 1, 2, 3, 4];
+
+function aFechaIso(fecha: Date): string {
+  const anio = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
 
 function fechaHoyIso(): string {
-  const hoy = new Date();
-  const anio = hoy.getFullYear();
-  const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-  const dia = String(hoy.getDate()).padStart(2, '0');
-  return `${anio}-${mes}-${dia}`;
+  return aFechaIso(new Date());
+}
+
+function desdeFechaIso(fechaIso: string): Date {
+  const [anio, mes, dia] = fechaIso.split('-').map(Number);
+  return new Date(anio, mes - 1, dia);
+}
+
+function sumarDias(fechaIso: string, dias: number): string {
+  const fecha = desdeFechaIso(fechaIso);
+  fecha.setDate(fecha.getDate() + dias);
+  return aFechaIso(fecha);
+}
+
+function lunesDeLaSemana(fechaIso: string): string {
+  const fecha = desdeFechaIso(fechaIso);
+  const dia = fecha.getDay();
+  const diferencia = dia === 0 ? -6 : 1 - dia;
+  fecha.setDate(fecha.getDate() + diferencia);
+  return aFechaIso(fecha);
 }
 
 @Component({
@@ -52,12 +88,44 @@ export class PanelAgendaComponent implements OnInit {
   readonly staff = signal<StaffAtencion[]>([]);
   readonly profesionalSeleccionado = signal<string>('');
   readonly fechaSeleccionada = signal<string>(fechaHoyIso());
+  readonly vista = signal<VistaAgenda>('semana');
+  readonly lunesSemana = signal<string>(lunesDeLaSemana(fechaHoyIso()));
 
-  // Listado del día
+  // Listados
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);
   readonly turnos = signal<TurnoListado[]>([]);
+  readonly turnosSemana = signal<TurnoListado[]>([]);
   readonly exito = signal<string | null>(null);
+
+  /** Columnas de la vista semanal con sus turnos activos ordenados por hora. */
+  readonly diasSemanaVista = computed<DiaSemanaVista[]>(() => {
+    const lunes = this.lunesSemana();
+    const hoy = fechaHoyIso();
+    const turnos = this.turnosSemana().filter((t) => t.estado !== 'cancelado');
+
+    return OFFSETS_DIAS_VISIBLES.map((offset) => {
+      const fecha = sumarDias(lunes, offset);
+      const fechaDate = desdeFechaIso(fecha);
+      return {
+        fecha,
+        etiqueta: ETIQUETAS_DIA[fechaDate.getDay()],
+        numero: fechaDate.getDate(),
+        esHoy: fecha === hoy,
+        turnos: turnos
+          .filter((t) => aFechaIso(new Date(t.fecha_hora)) === fecha)
+          .sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora)),
+      };
+    });
+  });
+
+  readonly etiquetaSemana = computed(() => {
+    const lunes = desdeFechaIso(this.lunesSemana());
+    const ultimoOffset = OFFSETS_DIAS_VISIBLES[OFFSETS_DIAS_VISIBLES.length - 1];
+    const fin = desdeFechaIso(sumarDias(this.lunesSemana(), ultimoOffset));
+    const opciones: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
+    return `${lunes.toLocaleDateString('es-AR', opciones)} – ${fin.toLocaleDateString('es-AR', opciones)}`;
+  });
 
   // Modal nuevo turno
   readonly modalAbierto = signal(false);
@@ -123,6 +191,14 @@ export class PanelAgendaComponent implements OnInit {
   }
 
   cargarAgenda(): void {
+    if (this.vista() === 'semana') {
+      this.cargarSemana();
+    } else {
+      this.cargarDia();
+    }
+  }
+
+  private cargarDia(): void {
     const profesionalId = this.profesionalSeleccionado();
     const fecha = this.fechaSeleccionada();
     if (!profesionalId || !fecha) {
@@ -144,6 +220,55 @@ export class PanelAgendaComponent implements OnInit {
     });
   }
 
+  private cargarSemana(): void {
+    const profesionalId = this.profesionalSeleccionado();
+    if (!profesionalId) {
+      return;
+    }
+
+    const desde = this.lunesSemana();
+    const ultimoOffset = OFFSETS_DIAS_VISIBLES[OFFSETS_DIAS_VISIBLES.length - 1];
+    const hasta = sumarDias(desde, ultimoOffset);
+
+    this.cargando.set(true);
+    this.error.set(null);
+
+    this.turnoService.listarRango(desde, hasta, profesionalId).subscribe({
+      next: (datos) => {
+        this.turnosSemana.set(datos);
+        this.cargando.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.error?.mensaje ?? 'No se pudo cargar la agenda.');
+        this.cargando.set(false);
+      },
+    });
+  }
+
+  cambiarVista(vista: VistaAgenda): void {
+    if (this.vista() === vista) {
+      return;
+    }
+    this.vista.set(vista);
+    this.cargarAgenda();
+  }
+
+  moverSemana(delta: number): void {
+    this.lunesSemana.set(sumarDias(this.lunesSemana(), delta * 7));
+    this.cargarSemana();
+  }
+
+  irASemanaActual(): void {
+    this.lunesSemana.set(lunesDeLaSemana(fechaHoyIso()));
+    this.cargarSemana();
+  }
+
+  verDia(fecha: string): void {
+    this.fechaSeleccionada.set(fecha);
+    this.vista.set('dia');
+    this.cargarDia();
+  }
+
   cambiarProfesional(id: string): void {
     this.profesionalSeleccionado.set(id);
     this.cargarAgenda();
@@ -151,7 +276,7 @@ export class PanelAgendaComponent implements OnInit {
 
   cambiarFecha(fecha: string): void {
     this.fechaSeleccionada.set(fecha);
-    this.cargarAgenda();
+    this.cargarDia();
   }
 
   // ── Modal nuevo turno ────────────────────────────────────────────
@@ -163,7 +288,8 @@ export class PanelAgendaComponent implements OnInit {
     this.slots.set([]);
     this.clienteEncontrado.set(null);
     this.busquedaRealizada.set(false);
-    this.formularioTurno.reset({ servicio_id: '', fecha: this.fechaSeleccionada() });
+    const fechaInicial = this.vista() === 'dia' ? this.fechaSeleccionada() : fechaHoyIso();
+    this.formularioTurno.reset({ servicio_id: '', fecha: fechaInicial });
     this.formularioCliente.reset({ email: '', nombre: '', apellido: '', telefono: '' });
     this.modalAbierto.set(true);
   }
@@ -276,9 +402,7 @@ export class PanelAgendaComponent implements OnInit {
           this.guardando.set(false);
           this.modalAbierto.set(false);
           this.exito.set('Turno agendado correctamente.');
-          if (fecha === this.fechaSeleccionada()) {
-            this.cargarAgenda();
-          }
+          this.cargarAgenda();
           setTimeout(() => this.exito.set(null), 4000);
         },
         error: (err) => {

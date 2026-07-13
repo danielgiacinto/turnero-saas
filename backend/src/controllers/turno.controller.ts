@@ -29,13 +29,15 @@ export const turnoController = {
     try {
       const ctx = obtenerContexto(req);
       const fecha = String(req.query.fecha ?? '');
-      if (!fecha) {
-        throw new ErrorValidacion('Indicá la fecha de la agenda (YYYY-MM-DD).');
+      const desde = String(req.query.desde ?? '') || fecha;
+      const hasta = String(req.query.hasta ?? '') || desde;
+      if (!desde) {
+        throw new ErrorValidacion('Indicá la fecha o el rango de la agenda (YYYY-MM-DD).');
       }
       const profesionalId = req.query.profesional_id
         ? String(req.query.profesional_id)
         : undefined;
-      const resultado = await turnoService.listarDelDia(ctx, { profesionalId, fecha });
+      const resultado = await turnoService.listarRango(ctx, { profesionalId, desde, hasta });
       respuestaExito(res, resultado);
     } catch (error) {
       next(error);
