@@ -1,0 +1,100 @@
+:host {
+  display: block;
+}
+
+.cliente-voltar {
+  color: var(--color-texto-muted);
+
+  &:hover {
+    color: var(--color-acento);
+  }
+}
+
+.cliente-datos {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+
+  @media (min-width: 576px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  dt {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-texto-muted);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+  }
+}
+
+.cliente-turnos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.cliente-turno {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  background-color: var(--color-fondo);
+
+  &__fecha {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    min-width: 4.5rem;
+    padding-right: 0.85rem;
+    border-right: 1px solid var(--color-borde);
+  }
+
+  &__dia {
+    font-size: 0.75rem;
+    color: var(--color-texto-muted);
+  }
+
+  &__hora {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-acento);
+  }
+
+  &__detalle {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  &__servicio {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  &__prof {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--color-texto-muted);
+  }
+}
+
+.form-control {
+  background-color: var(--color-superficie);
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+
+  &:focus {
+    background-color: var(--color-superficie);
+    border-color: var(--color-acento);
+    color: var(--color-texto);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--color-acento) 25%, transparent);
+  }
+}

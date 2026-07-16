@@ -8,3 +8,7 @@ export const clienteRoutes = Router();
 clienteRoutes.use(autenticarStaff, requerirComercio, requerirSuscripcionActiva);
 
 clienteRoutes.get('/buscar', clienteController.buscar);
+clienteRoutes.get('/', clienteController.listar);
+clienteRoutes.get('/:id', clienteController.obtener);
+clienteRoutes.post('/', clienteController.crear);
+clienteRoutes.put('/:id', clienteController.actualizar);

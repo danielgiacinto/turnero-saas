@@ -1,0 +1,185 @@
+<nav class="mb-2" aria-label="Miga de pan">
+  <a routerLink="/panel/clientes" class="cliente-voltar small text-decoration-none">
+    <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+    Clientes
+  </a>
+</nav>
+
+@if (cargando()) {
+  <p class="small text-muted mb-0">
+    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    Cargando cliente…
+  </p>
+} @else if (error()) {
+  <div class="alert alert-danger py-2 small mb-3">{{ error() }}</div>
+  <a routerLink="/panel/clientes" class="btn btn-sm btn-outline-secondary">Volver al listado</a>
+} @else if (cliente(); as c) {
+  <header class="mb-4 d-flex flex-wrap justify-content-between align-items-start gap-2">
+    <div>
+      <h1 class="h4 mb-1">{{ c.apellido }}, {{ c.nombre }}</h1>
+      <p class="text-muted small mb-0">
+        {{ c.total_turnos }} turno{{ c.total_turnos === 1 ? '' : 's' }} en tu comercio
+      </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a routerLink="/panel" class="btn btn-sm btn-accento">
+        <i class="bi bi-calendar-plus me-1" aria-hidden="true"></i>
+        Agendar turno
+      </a>
+      @if (!editando()) {
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="iniciarEdicion()">
+          <i class="bi bi-pencil me-1" aria-hidden="true"></i>
+          Editar datos
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (exito()) {
+    <div class="alert alert-success py-2 small mb-3 d-flex align-items-start gap-2">
+      <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+      <span>{{ exito() }}</span>
+    </div>
+  }
+
+  <section class="panel-comercio__tarjeta mb-4" aria-labelledby="titulo-datos-cliente">
+    <h2 id="titulo-datos-cliente" class="h6 mb-3">Datos de contacto</h2>
+
+    @if (editando()) {
+      <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label small" for="edit-nombre">Nombre</label>
+            <input
+              id="edit-nombre"
+              type="text"
+              formControlName="nombre"
+              class="form-control"
+              [class.is-invalid]="esInvalido('nombre')"
+            />
+            @if (esInvalido('nombre')) {
+              <div class="invalid-feedback d-block">{{ mensaje('nombre', 'El nombre') }}</div>
+            }
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small" for="edit-apellido">Apellido</label>
+            <input
+              id="edit-apellido"
+              type="text"
+              formControlName="apellido"
+              class="form-control"
+              [class.is-invalid]="esInvalido('apellido')"
+            />
+            @if (esInvalido('apellido')) {
+              <div class="invalid-feedback d-block">{{ mensaje('apellido', 'El apellido') }}</div>
+            }
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small" for="edit-email">Email</label>
+            <input
+              id="edit-email"
+              type="email"
+              formControlName="email"
+              class="form-control"
+              [class.is-invalid]="esInvalido('email')"
+            />
+            @if (esInvalido('email')) {
+              <div class="invalid-feedback d-block">{{ mensaje('email', 'El email') }}</div>
+            }
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small" for="edit-telefono">Teléfono</label>
+            <input
+              id="edit-telefono"
+              type="tel"
+              formControlName="telefono"
+              class="form-control"
+              [class.is-invalid]="esInvalido('telefono')"
+            />
+            @if (esInvalido('telefono')) {
+              <div class="invalid-feedback d-block">{{ mensaje('telefono', 'El teléfono') }}</div>
+            }
+          </div>
+        </div>
+
+        @if (errorFormulario()) {
+          <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorFormulario() }}</div>
+        }
+
+        <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            [disabled]="guardando()"
+            (click)="cancelarEdicion()"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-sm btn-accento" [disabled]="guardando()">
+            @if (guardando()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              Guardando…
+            } @else {
+              Guardar cambios
+            }
+          </button>
+        </div>
+      </form>
+    } @else {
+      <dl class="cliente-datos">
+        <div>
+          <dt>Email</dt>
+          <dd>
+            {{ c.email }}
+            @if (c.email_verificado) {
+              <span class="badge-estado badge-estado--confirmado ms-1">Verificado</span>
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>Teléfono</dt>
+          <dd>
+            {{ c.telefono }}
+            @if (c.telefono_verificado) {
+              <span class="badge-estado badge-estado--confirmado ms-1">Verificado</span>
+            }
+          </dd>
+        </div>
+      </dl>
+    }
+  </section>
+
+  <section class="panel-comercio__tarjeta" aria-labelledby="titulo-historial">
+    <h2 id="titulo-historial" class="h6 mb-3 d-flex align-items-center gap-2">
+      <i class="bi bi-clock-history" aria-hidden="true"></i>
+      Historial de turnos
+    </h2>
+
+    @if (c.turnos.length === 0) {
+      <p class="small text-muted mb-0">Sin turnos registrados.</p>
+    } @else {
+      <div class="cliente-turnos">
+        @for (t of c.turnos; track t.id) {
+          <article class="cliente-turno">
+            <div class="cliente-turno__fecha">
+              <span class="cliente-turno__dia">{{ t.fecha_hora | date: 'dd/MM/yyyy' }}</span>
+              <span class="cliente-turno__hora">{{ t.fecha_hora | date: 'HH:mm' }}</span>
+            </div>
+            <div class="cliente-turno__detalle">
+              <p class="cliente-turno__servicio">{{ t.servicio.nombre }}</p>
+              <p class="cliente-turno__prof">
+                {{ t.profesional.nombre }} · {{ t.duracion_minutos }} min
+                @if (t.origen_reserva === 'panel_staff') {
+                  <span class="text-muted"> · Panel</span>
+                } @else {
+                  <span class="text-muted"> · Portal</span>
+                }
+              </p>
+            </div>
+            <span [class]="claseBadgeTurno(t.estado)">{{ etiquetasEstado[t.estado] }}</span>
+          </article>
+        }
+      </div>
+    }
+  </section>
+}

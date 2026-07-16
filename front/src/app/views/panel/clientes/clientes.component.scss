@@ -1,0 +1,134 @@
+:host {
+  display: block;
+}
+
+.clientes-vacio__icono {
+  font-size: 2.5rem;
+  color: var(--color-texto-muted);
+}
+
+.clientes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.cliente-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    transform 0.1s ease;
+
+  &:hover {
+    border-color: var(--color-acento);
+    transform: translateY(-1px);
+    color: var(--color-texto);
+  }
+
+  &__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background-color: var(--color-hover);
+    color: var(--color-acento);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  &__info {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  &__nombre {
+    margin: 0 0 0.2rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  &__contacto {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--color-texto-muted);
+    word-break: break-all;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  &__turnos {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  &__ultimo {
+    font-size: 0.72rem;
+    color: var(--color-texto-muted);
+  }
+
+  &__chevron {
+    color: var(--color-texto-muted);
+    margin-top: 0.15rem;
+  }
+}
+
+.cliente-modal {
+  z-index: 1060;
+
+  &__backdrop {
+    z-index: 1055;
+  }
+
+  &__contenido {
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto);
+  }
+
+  .modal-title {
+    color: var(--color-texto);
+  }
+
+  .btn-close {
+    filter: var(--bs-btn-close-white-filter, none);
+  }
+}
+
+.form-control,
+.input-group-text {
+  background-color: var(--color-superficie);
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+}
+
+.form-control:focus {
+  background-color: var(--color-superficie);
+  border-color: var(--color-acento);
+  color: var(--color-texto);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--color-acento) 25%, transparent);
+}
+
+.input-group-text {
+  background-color: var(--color-fondo);
+  color: var(--color-texto-muted);
+}

@@ -1,0 +1,214 @@
+<header class="mb-4 d-flex flex-wrap justify-content-between align-items-start gap-2">
+  <div>
+    <h1 class="h4 mb-1 d-flex align-items-center gap-2">
+      <i class="bi bi-people-fill text-muted" aria-hidden="true"></i>
+      Clientes
+    </h1>
+    <p class="text-muted small mb-0">
+      Personas que tuvieron turnos en tu comercio. Podés buscar y registrar nuevos.
+    </p>
+  </div>
+  <button type="button" class="btn btn-accento btn-sm" (click)="abrirAlta()">
+    <i class="bi bi-person-plus me-1" aria-hidden="true"></i>
+    Nuevo cliente
+  </button>
+</header>
+
+<section class="panel-comercio__tarjeta mb-4">
+  <label class="form-label small" for="clientes-buscar">Buscar</label>
+  <div class="input-group">
+    <span class="input-group-text">
+      <i class="bi bi-search" aria-hidden="true"></i>
+    </span>
+    <input
+      id="clientes-buscar"
+      type="search"
+      class="form-control"
+      placeholder="Nombre, apellido, email o teléfono…"
+      [value]="busqueda()"
+      (input)="onBusqueda($any($event.target).value)"
+    />
+  </div>
+</section>
+
+@if (exito()) {
+  <div class="alert alert-success py-2 small mb-3 d-flex align-items-start gap-2">
+    <i class="bi bi-check-circle-fill flex-shrink-0" aria-hidden="true"></i>
+    <span>{{ exito() }}</span>
+  </div>
+}
+
+@if (cargando()) {
+  <p class="small text-muted mb-0">
+    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    Cargando clientes…
+  </p>
+} @else if (error()) {
+  <div class="alert alert-danger py-2 small mb-0">{{ error() }}</div>
+} @else if (clientes().length === 0) {
+  <div class="panel-comercio__tarjeta text-center py-5">
+    <i class="bi bi-people clientes-vacio__icono" aria-hidden="true"></i>
+    <p class="text-muted small mb-3 mt-2">
+      @if (busqueda()) {
+        No hay resultados para “{{ busqueda() }}”.
+      } @else {
+        Todavía no hay clientes con turnos en tu comercio. Registrá uno o agendá un turno desde la
+        Agenda.
+      }
+    </p>
+    <div class="d-flex flex-wrap justify-content-center gap-2">
+      <button type="button" class="btn btn-accento btn-sm" (click)="abrirAlta()">
+        <i class="bi bi-person-plus me-1" aria-hidden="true"></i>
+        Nuevo cliente
+      </button>
+      <a routerLink="/panel" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
+        Ir a la Agenda
+      </a>
+    </div>
+  </div>
+} @else {
+  <div class="clientes-lista">
+    @for (c of clientes(); track c.id) {
+      <a class="cliente-card" [routerLink]="['/panel/clientes', c.id]">
+        <div class="cliente-card__avatar" aria-hidden="true">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <div class="cliente-card__info">
+          <h2 class="cliente-card__nombre">{{ c.apellido }}, {{ c.nombre }}</h2>
+          <p class="cliente-card__contacto">
+            <span><i class="bi bi-envelope me-1" aria-hidden="true"></i>{{ c.email }}</span>
+            <span><i class="bi bi-telephone me-1" aria-hidden="true"></i>{{ c.telefono }}</span>
+          </p>
+        </div>
+        <div class="cliente-card__meta">
+          <span class="cliente-card__turnos">{{ c.total_turnos }} turno{{ c.total_turnos === 1 ? '' : 's' }}</span>
+          @if (c.ultimo_turno) {
+            <span class="cliente-card__ultimo">
+              Último: {{ c.ultimo_turno | date: 'dd/MM/yyyy' }}
+            </span>
+          }
+          <i class="bi bi-chevron-right cliente-card__chevron" aria-hidden="true"></i>
+        </div>
+      </a>
+    }
+  </div>
+}
+
+@if (modalAbierto()) {
+  <div
+    class="modal fade show d-block cliente-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-cliente-titulo"
+    (click)="cerrarModal()"
+  >
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content cliente-modal__contenido">
+        <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+          <div class="modal-header border-0 pb-0">
+            <h2 id="modal-cliente-titulo" class="modal-title h6 d-flex align-items-center gap-2">
+              <i class="bi bi-person-plus" aria-hidden="true"></i>
+              Nuevo cliente
+            </h2>
+            <button
+              type="button"
+              class="btn-close"
+              aria-label="Cerrar"
+              [disabled]="guardando()"
+              (click)="cerrarModal()"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <p class="small text-muted mb-3">
+              El email debe ser único. Si el cliente ya está cargado, buscalo en el listado.
+            </p>
+
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label small" for="cliente-nombre">Nombre</label>
+                <input
+                  id="cliente-nombre"
+                  type="text"
+                  formControlName="nombre"
+                  class="form-control"
+                  [class.is-invalid]="esInvalido('nombre')"
+                />
+                @if (esInvalido('nombre')) {
+                  <div class="invalid-feedback d-block">{{ mensaje('nombre', 'El nombre') }}</div>
+                }
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small" for="cliente-apellido">Apellido</label>
+                <input
+                  id="cliente-apellido"
+                  type="text"
+                  formControlName="apellido"
+                  class="form-control"
+                  [class.is-invalid]="esInvalido('apellido')"
+                />
+                @if (esInvalido('apellido')) {
+                  <div class="invalid-feedback d-block">{{ mensaje('apellido', 'El apellido') }}</div>
+                }
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small" for="cliente-email">Email</label>
+                <input
+                  id="cliente-email"
+                  type="email"
+                  formControlName="email"
+                  class="form-control"
+                  [class.is-invalid]="esInvalido('email')"
+                />
+                @if (esInvalido('email')) {
+                  <div class="invalid-feedback d-block">{{ mensaje('email', 'El email') }}</div>
+                }
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small" for="cliente-telefono">Teléfono</label>
+                <input
+                  id="cliente-telefono"
+                  type="tel"
+                  formControlName="telefono"
+                  class="form-control"
+                  [class.is-invalid]="esInvalido('telefono')"
+                  placeholder="11 5555-5555"
+                />
+                @if (esInvalido('telefono')) {
+                  <div class="invalid-feedback d-block">{{ mensaje('telefono', 'El teléfono') }}</div>
+                }
+              </div>
+            </div>
+
+            @if (errorFormulario()) {
+              <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorFormulario() }}</div>
+            }
+          </div>
+
+          <div class="modal-footer border-0 pt-0">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              [disabled]="guardando()"
+              (click)="cerrarModal()"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-sm btn-accento" [disabled]="guardando()">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Guardando…
+              } @else {
+                <i class="bi bi-check2 me-1" aria-hidden="true"></i>
+                Guardar
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show cliente-modal__backdrop"></div>
+}

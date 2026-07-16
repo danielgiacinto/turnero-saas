@@ -3,7 +3,6 @@ import { Routes } from '@angular/router';
 import { adminGuard } from '../../core/guards/admin.guard';
 import { suscripcionGuard } from '../../core/guards/suscripcion.guard';
 import { PanelLayoutComponent } from '../../shared/components/panel-layout/panel-layout.component';
-import { PanelInicioComponent } from './panel-inicio.component';
 import { PanelSuscripcionComponent } from './panel-suscripcion.component';
 import { PanelConfiguracionComponent } from './configuracion/panel-configuracion.component';
 import { ConfiguracionAparienciaComponent } from './configuracion/apariencia/apariencia.component';
@@ -12,6 +11,8 @@ import { PanelProfesionalesComponent } from './profesionales/profesionales.compo
 import { PanelServiciosComponent } from './servicios/servicios.component';
 import { PanelHorariosComponent } from './horarios/horarios.component';
 import { PanelAgendaComponent } from './agenda/agenda.component';
+import { PanelClientesComponent } from './clientes/clientes.component';
+import { ClienteDetalleComponent } from './clientes/cliente-detalle.component';
 
 export const PANEL_ROUTES: Routes = [
   {
@@ -24,7 +25,8 @@ export const PANEL_ROUTES: Routes = [
         canActivate: [suscripcionGuard],
         children: [
           { path: '', component: PanelAgendaComponent },
-          { path: 'clientes', component: PanelInicioComponent },
+          { path: 'clientes', component: PanelClientesComponent },
+          { path: 'clientes/:id', component: ClienteDetalleComponent },
           { path: 'servicios', component: PanelServiciosComponent },
           { path: 'horarios', component: PanelHorariosComponent },
           {

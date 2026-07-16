@@ -1,3 +1,4 @@
+import type { ClienteResumen } from './cliente.model';
 import { RolUsuario } from './usuario.model';
 
 export type EstadoTurno =
@@ -9,6 +10,8 @@ export type EstadoTurno =
 
 export type OrigenReserva = 'portal_publico' | 'panel_staff';
 
+export type { ClienteResumen } from './cliente.model';
+
 export interface Turno {
   id: string;
   comercio_id: string;
@@ -18,14 +21,6 @@ export interface Turno {
   link_reunion: string | null;
   estado: EstadoTurno;
   fecha_hora: string;
-}
-
-export interface ClienteResumen {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string;
 }
 
 export interface TurnoListado {
